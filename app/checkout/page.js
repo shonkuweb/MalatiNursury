@@ -5,23 +5,14 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   FiChevronRight,
-  FiCreditCard,
-  FiDollarSign,
   FiGrid,
   FiHome,
   FiLock,
   FiPackage,
-  FiSmartphone,
   FiTruck,
   FiX
 } from "react-icons/fi";
 import { FaWhatsapp } from "react-icons/fa";
-
-const PAYMENT_OPTIONS = [
-  { id: "upi", label: "UPI / GPay / PhonePe", desc: "Instant & secure", icon: FiSmartphone },
-  { id: "cod", label: "Cash on Delivery", desc: "Pay when it arrives", icon: FiDollarSign },
-  { id: "card", label: "Card / Net Banking", desc: "Visa, Mastercard, RuPay", icon: FiCreditCard }
-];
 import { useCart } from "../context/CartContext";
 import { categories as menuCategories } from "../data/categories";
 import SiteFooter, { PaymentCards } from "../components/SiteFooter";
@@ -38,7 +29,6 @@ export default function CheckoutPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { items: cartItems, clear } = useCart();
   const [form, setForm] = useState({ name: "", phone: "", pincode: "", address: "" });
-  const [payMethod, setPayMethod] = useState("upi");
 
   const itemTotal = cartItems.reduce((sum, i) => sum + toAmount(i.price) * i.qty, 0);
   const deliveryCharge = cartItems.length === 0 || itemTotal >= FREE_DELIVERY_THRESHOLD ? 0 : DELIVERY_CHARGE;
@@ -58,12 +48,13 @@ export default function CheckoutPage() {
       alert("Your cart is empty.");
       return;
     }
-    if (!form.name.trim() || !form.phone.trim()) {
-      alert("Please enter your name and phone number.");
+    if (!form.name.trim() || !form.phone.trim() || !form.address.trim() || !form.pincode.trim()) {
+      alert("Please fill in all delivery details.");
       return;
     }
+    const orderId = `KN-${Date.now().toString().slice(-6)}`;
     const order = {
-      id: `KN-${Date.now().toString().slice(-6)}`,
+      id: orderId,
       customer: form.name.trim(),
       phone: form.phone.trim(),
       address: form.address.trim(),
@@ -79,8 +70,29 @@ export default function CheckoutPage() {
     } catch {
       localStorage.setItem("admin-orders", JSON.stringify([order]));
     }
+
+    let message = `*New Order: ${orderId}*\n\n`;
+    message += `*Customer Details:*\n`;
+    message += `Name: ${form.name.trim()}\n`;
+    message += `Phone: ${form.phone.trim()}\n`;
+    message += `Address: ${form.address.trim()}\n`;
+    message += `Pincode: ${form.pincode.trim()}\n\n`;
+    message += `*Order Items:*\n`;
+    cartItems.forEach(item => {
+      message += `- ${item.title} (x${item.qty}) - Rs. ${(toAmount(item.price) * item.qty).toFixed(2)}\n`;
+    });
+    message += `\n*Item Total:* Rs. ${itemTotal.toFixed(2)}\n`;
+    message += `*Delivery Charge:* ${deliveryCharge === 0 ? "FREE" : `Rs. ${deliveryCharge.toFixed(2)}`}\n`;
+    message += `*Total Payable:* Rs. ${grandTotal.toFixed(2)}`;
+
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/919836820811?text=${encodedMessage}`;
+    
+    // Open WhatsApp in new window
+    window.open(whatsappUrl, '_blank');
+
     clear();
-    router.push(`/track-order?id=${order.id}`);
+    router.push(`/track-order?id=${orderId}`);
   };
 
   return (
@@ -104,46 +116,9 @@ export default function CheckoutPage() {
           <textarea placeholder="Full Address" rows={3} value={form.address} onChange={updateField("address")} />
         </div>
 
-        <div className="checkout-card">
-          <div className="card-head">
-            <h3>
-              <span className="step-badge">2</span>Payment Method
-            </h3>
-            <span className="sub-muted">No extra fees on prepaid</span>
-          </div>
-          <div className="pay-options">
-            {PAYMENT_OPTIONS.map((opt) => {
-              const Icon = opt.icon;
-              const selected = payMethod === opt.id;
-              return (
-                <button
-                  type="button"
-                  key={opt.id}
-                  className={`pay-option ${selected ? "selected" : ""}`}
-                  onClick={() => setPayMethod(opt.id)}
-                  aria-pressed={selected}
-                >
-                  <span className="pay-option-icon">
-                    <Icon />
-                  </span>
-                  <span className="pay-option-text">
-                    <strong>{opt.label}</strong>
-                    <span>{opt.desc}</span>
-                  </span>
-                  <span className={`pay-radio ${selected ? "on" : ""}`} />
-                </button>
-              );
-            })}
-          </div>
-          <div className="pay-accepted">
-            <span className="pay-accepted-label">Accepted here</span>
-            <PaymentCards />
-          </div>
-        </div>
-
         <div className="bill-card">
           <h3>
-            <span className="step-badge">3</span>Order Summary
+            <span className="step-badge">2</span>Order Summary
           </h3>
           {cartItems.length === 0 && <p className="empty-small">No products selected.</p>}
           <div className="order-lines">
@@ -181,11 +156,11 @@ export default function CheckoutPage() {
         </div>
 
         <button type="button" className="add-btn cart-checkout-btn checkout-place-btn" onClick={placeOrder}>
-          <span>Place Order</span>
+          <span>Place Order on WhatsApp</span>
           {cartItems.length > 0 && <span className="checkout-place-total">Rs. {grandTotal.toFixed(2)}</span>}
         </button>
         <p className="checkout-secure-note">
-          <FiLock /> 100% secure &amp; encrypted payment
+          <FaWhatsapp /> Place order directly via WhatsApp
         </p>
       </section>
 

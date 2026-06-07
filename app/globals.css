@@ -10,7 +10,7 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background: #eef2ec;
+  background: #eef4f0;
   min-height: 100%;
 }
 
@@ -19,13 +19,13 @@ body {
   max-width: 1280px;
   margin: 0 auto;
   min-height: 100vh;
-  background: #f4f8f4;
+  background: #f4f9f6;
   color: #222;
   position: relative;
 }
 
 .top-strip {
-  background: #1f6b2c;
+  background: #004b23;
   color: #fff;
   text-align: center;
   padding: 12px 10px;
@@ -82,7 +82,7 @@ body {
   align-items: center;
   gap: 10px;
   width: 100%;
-  border: 3px solid #2d8c3c;
+  border: 3px solid #187a32;
   border-radius: 999px;
   padding: 0 16px;
 }
@@ -107,9 +107,10 @@ body {
 }
 
 .category-row {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 8px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 24px;
   padding: 8px 10px 16px;
   border-top: 1px solid #efefef;
   border-bottom: 1px solid #efefef;
@@ -134,7 +135,7 @@ body {
 }
 
 .active-category {
-  color: #2c8838;
+  color: #187a32;
   font-weight: 700;
 }
 
@@ -150,7 +151,7 @@ body {
 .category-icon svg {
   width: 34px;
   height: 34px;
-  color: #3d8f3f;
+  color: #187a32;
 }
 
 .tone-a {
@@ -181,9 +182,9 @@ body {
 .hero {
   height: 430px;
   background:
-    radial-gradient(circle at 15% 85%, rgba(86, 171, 66, 0.55), transparent 36%),
-    radial-gradient(circle at 85% 15%, rgba(162, 201, 115, 0.5), transparent 31%),
-    linear-gradient(135deg, #5b7955 0%, #2f4a33 45%, #1d2d22 100%);
+    radial-gradient(circle at 15% 85%, rgba(24, 122, 50, 0.55), transparent 36%),
+    radial-gradient(circle at 85% 15%, rgba(115, 168, 131, 0.5), transparent 31%),
+    linear-gradient(135deg, #4d6e56 0%, #223b29 45%, #112116 100%);
   background-position: center;
   display: flex;
   align-items: flex-end;
@@ -196,7 +197,7 @@ body {
 
 .badge {
   display: inline-block;
-  background: #4cae3a;
+  background: #228b22;
   border-radius: 999px;
   padding: 5px 12px;
   font-size: 15px;
@@ -216,7 +217,7 @@ body {
 
 .cta-btn {
   border: none;
-  background: #2d8c3c;
+  background: #187a32;
   color: #fff;
   font-size: 28px;
   font-weight: 700;
@@ -226,7 +227,7 @@ body {
 }
 
 .notice {
-  background: #1f6b2c;
+  background: #004b23;
   color: #fff;
   font-size: 16px;
   font-weight: 700;
@@ -268,7 +269,7 @@ body {
 }
 
 .section-head a {
-  color: #2e8b3d;
+  color: #187a32;
   text-decoration: none;
   font-size: 17px;
 }
@@ -382,7 +383,7 @@ body {
 .add-btn {
   width: 100%;
   margin-top: 10px;
-  background: #2d8c3c;
+  background: #187a32;
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -398,8 +399,8 @@ body {
 
 .site-footer {
   padding: 22px 16px 112px;
-  background: #e8efe8;
-  border-top: 1px solid #d8e4d8;
+  background: #e6f0e9;
+  border-top: 1px solid #d5e6da;
 }
 
 .footer-grid {
@@ -501,7 +502,7 @@ body {
 
 .breadcrumbs a,
 .breadcrumbs span {
-  color: #287f36;
+  color: #136326;
   text-decoration: none;
 }
 
@@ -510,7 +511,7 @@ body {
 }
 
 .product-hero-image {
-  background: linear-gradient(180deg, #f5f8f4 0%, #eef2ec 100%);
+  background: linear-gradient(180deg, #f5f8f4 0%, #eef4f0 100%);
   padding: 16px 16px 20px;
 }
 
@@ -556,7 +557,7 @@ body {
   gap: 6px;
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(4px);
-  color: #1f6b2b;
+  color: #004b23;
   font-size: 13px;
   font-weight: 700;
   padding: 6px 12px;
@@ -573,7 +574,7 @@ body {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #2d8c3c;
+  color: #187a32;
 }
 
 .product-detail-body h1 {
@@ -662,8 +663,8 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #e4f3e6;
-  color: #2d8c3c;
+  background: #e1f2e6;
+  color: #187a32;
   border-radius: 50%;
   font-size: 11px;
   font-weight: 800;
@@ -671,7 +672,7 @@ body {
 
 .delivery-box {
   margin-top: 14px;
-  background: #f2f6f2;
+  background: #f0f7f3;
   border-radius: 10px;
   padding: 12px;
 }
@@ -697,7 +698,7 @@ body {
 
 .pin-row button {
   border: none;
-  background: #2d8c3c;
+  background: #187a32;
   color: #fff;
   border-radius: 8px;
   padding: 0 16px;
@@ -731,12 +732,12 @@ body {
   align-items: center;
   justify-content: center;
   font-size: 16px;
-  color: #2d8c3c;
+  color: #187a32;
   cursor: pointer;
 }
 
 .qty-box button:hover {
-  background: #e1efe3;
+  background: #dff0e4;
 }
 
 .cta-row {
@@ -748,8 +749,8 @@ body {
 
 .add-btn.ghost {
   background: #fff;
-  color: #2d8c3c;
-  border: 1.5px solid #2d8c3c;
+  color: #187a32;
+  border: 1.5px solid #187a32;
 }
 
 .trust-row {
@@ -758,8 +759,8 @@ body {
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   padding: 14px 8px;
-  background: #f6f9f5;
-  border: 1px solid #e6efe5;
+  background: #f5faf7;
+  border: 1px solid #e2f0e6;
   border-radius: 14px;
 }
 
@@ -771,13 +772,13 @@ body {
   text-align: center;
   font-size: 11px;
   font-weight: 600;
-  color: #3a4a3c;
+  color: #2f4033;
 }
 
 .trust-item svg {
   width: 22px;
   height: 22px;
-  color: #2d8c3c;
+  color: #187a32;
 }
 
 .accordion-block {
@@ -943,7 +944,7 @@ body {
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #2d8c3c;
+  color: #187a32;
   margin-bottom: 4px;
 }
 
@@ -1171,7 +1172,7 @@ body {
 
 .admin-form-grid input:focus {
   outline: none;
-  border-color: #2d8c3c;
+  border-color: #187a32;
   box-shadow: 0 0 0 3px rgba(45, 140, 60, 0.12);
 }
 
@@ -1204,7 +1205,7 @@ body {
 .cart-count {
   font-size: 13px;
   font-weight: 700;
-  color: #2d8c3c;
+  color: #187a32;
   background: #e8f5ec;
   padding: 5px 12px;
   border-radius: 999px;
@@ -1375,8 +1376,8 @@ body {
   font-size: 11px;
   font-weight: 600;
   color: #4a554c;
-  background: #f6f9f5;
-  border: 1px solid #e6efe5;
+  background: #f5faf7;
+  border: 1px solid #e2f0e6;
   border-radius: 12px;
   padding: 12px 6px;
 }
@@ -1384,7 +1385,7 @@ body {
 .cart-trust-item svg {
   width: 20px;
   height: 20px;
-  color: #2d8c3c;
+  color: #187a32;
 }
 
 .checkout-card {
@@ -1418,7 +1419,7 @@ body {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #2d8c3c;
+  background: #187a32;
   color: #fff;
   font-size: 13px;
   font-weight: 800;
@@ -1454,7 +1455,7 @@ body {
 .checkout-card textarea:focus {
   outline: none;
   background: #fff;
-  border-color: #2d8c3c;
+  border-color: #187a32;
   box-shadow: 0 0 0 3px rgba(45, 140, 60, 0.12);
 }
 
@@ -1487,7 +1488,7 @@ body {
 }
 
 .pay-option.selected {
-  border-color: #2d8c3c;
+  border-color: #187a32;
   background: #f1f9f3;
   box-shadow: 0 4px 12px rgba(45, 140, 60, 0.12);
 }
@@ -1500,7 +1501,7 @@ body {
   height: 40px;
   border-radius: 12px;
   background: #e8f3ea;
-  color: #2d8c3c;
+  color: #187a32;
   flex-shrink: 0;
 }
 
@@ -1536,7 +1537,7 @@ body {
 }
 
 .pay-radio.on {
-  border-color: #2d8c3c;
+  border-color: #187a32;
 }
 
 .pay-radio.on::after {
@@ -1544,7 +1545,7 @@ body {
   position: absolute;
   inset: 3px;
   border-radius: 50%;
-  background: #2d8c3c;
+  background: #187a32;
 }
 
 .checkout-place-btn {
@@ -1573,7 +1574,7 @@ body {
 .checkout-secure-note svg {
   width: 14px;
   height: 14px;
-  color: #2d8c3c;
+  color: #187a32;
 }
 
 .empty-block,
@@ -1584,12 +1585,12 @@ body {
 
 .info-block {
   margin: 14px 0 4px;
-  border: 1px solid #e6efe5;
+  border: 1px solid #e2f0e6;
   border-radius: 14px;
   padding: 14px 16px;
   background: linear-gradient(160deg, #ffffff 0%, #f4f9f4 100%);
   font-size: 13px;
-  color: #3a4a3c;
+  color: #2f4033;
   box-shadow: 0 6px 18px rgba(31, 71, 39, 0.05);
 }
 
@@ -1679,7 +1680,7 @@ body {
 }
 
 .footer-link:hover {
-  color: #2d8c3c;
+  color: #187a32;
   text-decoration: underline;
 }
 
@@ -1733,7 +1734,7 @@ body {
   padding: 26px 20px;
   border-radius: 22px;
   text-align: center;
-  background: linear-gradient(155deg, #1b7a2c 0%, #2d8c3c 55%, #43a047 100%);
+  background: linear-gradient(155deg, #1b7a2c 0%, #187a32 55%, #43a047 100%);
   color: #fff;
   box-shadow: 0 16px 36px rgba(27, 122, 44, 0.28);
 }
@@ -1940,13 +1941,13 @@ body {
 
 .track-step.done .track-step-dot,
 .track-step.active .track-step-dot {
-  background: #2d8c3c;
-  border-color: #2d8c3c;
+  background: #187a32;
+  border-color: #187a32;
   color: #fff;
 }
 
 .track-step.done .track-step-line {
-  background: #2d8c3c;
+  background: #187a32;
 }
 
 .track-step.active .track-step-dot {
@@ -1959,7 +1960,7 @@ body {
 }
 
 .track-step.active .track-step-info p {
-  color: #2d8c3c;
+  color: #187a32;
   font-weight: 600;
 }
 
@@ -2137,8 +2138,6 @@ body {
   }
 
   .category-row {
-    grid-template-columns: repeat(6, minmax(80px, 1fr));
-    justify-items: center;
     padding: 14px 20px;
   }
 
@@ -2185,7 +2184,7 @@ body {
 @media (min-width: 901px) {
   html,
   body {
-    background: #e8efe8;
+    background: #e6f0e9;
   }
 
   .mobile-page {
@@ -2228,8 +2227,7 @@ body {
   }
 
   .category-row {
-    grid-template-columns: repeat(6, minmax(120px, 1fr));
-    gap: 16px;
+    gap: 32px;
     padding: 14px 28px 18px;
   }
 

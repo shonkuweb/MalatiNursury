@@ -179,13 +179,10 @@ export default function TrackOrderPage() {
         <button className="icon-btn" aria-label="Open menu" onClick={() => setMenuOpen(true)}>
           <FiMenu />
         </button>
-        <Link href="/" className="header-center" aria-label="Kishalaya Nursery home">
-          <img src="/logo.png" alt="Kishalaya Nursery" className="header-logo" />
+        <Link href="/" className="header-center" aria-label="Blooming Partners Nursery home" style={{ textDecoration: 'none', color: '#1f6b2c', fontSize: '20px', fontWeight: 'bold', textAlign: 'center', lineHeight: '1.2' }}>
+          Blooming Partners Nursery
         </Link>
         <div className="header-actions">
-          <Link href="/admin" className="icon-btn" aria-label="Go to admin panel">
-            <FiUser />
-          </Link>
           <Link href="/cart" className="icon-btn" aria-label="Shopping bag">
             <FiShoppingBag />
           </Link>

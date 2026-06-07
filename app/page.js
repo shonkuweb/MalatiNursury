@@ -25,9 +25,7 @@ const categories = [
   { label: "Seed", tone: "tone-a", icon: FaSeedling },
   { label: "Indoor", tone: "tone-b", icon: GiFlowerPot },
   { label: "Bougainvillea", tone: "tone-c", active: true, icon: GiFlowerTwirl },
-  { label: "Planters", tone: "tone-d", icon: GiFlowerPot },
-  { label: "Adenium", tone: "tone-e", icon: FaLeaf },
-  { label: "Orchid", tone: "tone-f", icon: FaTree }
+  { label: "Planters", tone: "tone-d", icon: GiFlowerPot }
 ];
 
 
@@ -35,7 +33,12 @@ export default function Home() {
   const heroEndRef = useRef(null);
   const [showBottomNav, setShowBottomNav] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const { addItem } = useCart();
+
+  const filteredProducts = products.filter(p =>
+    p.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   useEffect(() => {
     const checkHero = () => {
@@ -77,13 +80,10 @@ export default function Home() {
         <button className="icon-btn" aria-label="Open menu" onClick={() => setMenuOpen(true)}>
           <FiMenu />
         </button>
-        <Link href="/" className="header-center" aria-label="Kishalaya Nursery home">
-          <img src="/logo.png" alt="Kishalaya Nursery" className="header-logo" />
+        <Link href="/" className="header-center" aria-label="Blooming Partners Nursery home" style={{ textDecoration: 'none', color: '#1f6b2c', fontSize: '20px', fontWeight: 'bold', textAlign: 'center', lineHeight: '1.2' }}>
+          Blooming Partners Nursery
         </Link>
         <div className="header-actions">
-          <Link href="/admin" className="icon-btn" aria-label="Go to admin panel">
-            <FiUser />
-          </Link>
           <button className="icon-btn" aria-label="Shopping bag">
             <FiShoppingBag />
           </button>
@@ -93,7 +93,13 @@ export default function Home() {
       <div className="search-wrap">
         <div className="search-box">
           <FiSearch className="search-icon" />
-          <input type="text" placeholder="Search plants, pots..." aria-label="Search" />
+          <input 
+            type="text" 
+            placeholder="Search plants, pots..." 
+            aria-label="Search" 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
       </div>
 
@@ -126,29 +132,35 @@ export default function Home() {
 
       <section className="best-sellers">
         <div className="section-head">
-          <h3>Best Sellers</h3>
-          <a href="/">View all</a>
+          <h3>{searchQuery ? "Search Results" : "Best Sellers"}</h3>
+          {!searchQuery && <a href="/">View all</a>}
         </div>
         <div className="product-row">
-          {products.map((product) => (
-            <article key={product.title} className="product-card">
-              <span className="offer-pill">{product.offer}</span>
-              <Link href={`/product/${product.slug}`} className="product-image-link">
-                <div className={`product-image ${product.imageClass}`} />
-              </Link>
-              <div className="product-info">
-                <p className="product-title">{product.title}</p>
-                <p className="product-rating">☆ ☆ ☆ ☆ ☆ {product.rating} | {product.reviews}</p>
-                <div className="price-row">
-                  <strong>{product.price}</strong>
-                  <span>{product.oldPrice}</span>
+          {filteredProducts.length > 0 ? (
+            filteredProducts.map((product) => (
+              <article key={product.title} className="product-card">
+                <span className="offer-pill">{product.offer}</span>
+                <Link href={`/product/${product.slug}`} className="product-image-link">
+                  <div className={`product-image ${product.imageClass}`} />
+                </Link>
+                <div className="product-info">
+                  <p className="product-title">{product.title}</p>
+                  <p className="product-rating">☆ ☆ ☆ ☆ ☆ {product.rating} | {product.reviews}</p>
+                  <div className="price-row">
+                    <strong>{product.price}</strong>
+                    <span>{product.oldPrice}</span>
+                  </div>
+                  <button className="add-btn" onClick={() => addItem(product.slug, 1)}>
+                    Add to Cart
+                  </button>
                 </div>
-                <button className="add-btn" onClick={() => addItem(product.slug, 1)}>
-                  Add to Cart
-                </button>
-              </div>
-            </article>
-          ))}
+              </article>
+            ))
+          ) : (
+            <p style={{ gridColumn: "1 / -1", textAlign: "center", padding: "20px", color: "#666" }}>
+              No products found matching "{searchQuery}".
+            </p>
+          )}
         </div>
       </section>
 

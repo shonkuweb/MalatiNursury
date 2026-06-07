@@ -9,7 +9,7 @@ export function CartProvider({ children }) {
   const [items, setItems] = useState([]);
 
   useEffect(() => {
-    const saved = localStorage.getItem("kishaloy-cart");
+    const saved = localStorage.getItem("blooming-partners-cart");
     if (saved) {
       try {
         setItems(JSON.parse(saved));
@@ -20,7 +20,7 @@ export function CartProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("kishaloy-cart", JSON.stringify(items));
+    localStorage.setItem("blooming-partners-cart", JSON.stringify(items));
   }, [items]);
 
   const addItem = (slug, qty = 1) => {

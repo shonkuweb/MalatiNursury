@@ -21,7 +21,6 @@ import {
   FiX
 } from "react-icons/fi";
 import { FaWhatsapp, FaLeaf } from "react-icons/fa";
-import { products } from "../../data/products";
 import { categories as menuCategories } from "../../data/categories";
 import { useCart } from "../../context/CartContext";
 import SiteFooter from "../../components/SiteFooter";
@@ -54,7 +53,7 @@ export default function ProductPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [qty, setQty] = useState(1);
   const [openAccordion, setOpenAccordion] = useState(0);
-  const { addItem } = useCart();
+  const { addItem, products, productsLoading } = useCart();
   const product = products.find((item) => item.slug === slug);
 
   useEffect(() => {
@@ -63,6 +62,14 @@ export default function ProductPage() {
       document.body.style.overflow = "";
     };
   }, [menuOpen]);
+
+  if (productsLoading) {
+    return (
+      <main className="mobile-page product-page">
+        <div className="top-strip">Loading...</div>
+      </main>
+    );
+  }
 
   if (!product) {
     return (
@@ -109,7 +116,8 @@ export default function ProductPage() {
       </div>
 
       <section className="product-hero-image">
-        <div className={`product-detail-image ${product.imageClass}`}>
+        <div className="product-detail-image">
+          <img src={product.image} alt={product.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           <span className="hero-badge">{product.offer}</span>
           <span className="hero-leaf"><FaLeaf /> Live Plant</span>
         </div>
@@ -132,8 +140,8 @@ export default function ProductPage() {
         <p className="urgent-pill">🔥 36 sold in the last 24 hours</p>
 
         <div className="price-row">
-          <strong>{product.price}</strong>
-          <span>{product.oldPrice}</span>
+          <strong>₹{product.price}</strong>
+          {product.oldPrice && <span>₹{product.oldPrice}</span>}
           <em className="offer-pill inline">{product.offer}</em>
         </div>
         <p className="tax-note">Inclusive of all taxes · Free delivery above ₹4999</p>
@@ -246,9 +254,7 @@ export default function ProductPage() {
           <Link href="/checkout" onClick={() => setMenuOpen(false)}>
             Checkout <FiChevronRight />
           </Link>
-          <Link href="/product/buttercup" onClick={() => setMenuOpen(false)}>
-            Product Details <FiChevronRight />
-          </Link>
+
         </nav>
         <div className="menu-categories">
           <p>Categories</p>
@@ -285,12 +291,7 @@ export default function ProductPage() {
           </span>
           <span>Cart</span>
         </Link>
-        <Link href="/track-order" className="bottom-item" aria-label="Track order">
-          <span className="bottom-icon">
-            <FiTruck />
-          </span>
-          <span>Track Order</span>
-        </Link>
+        
       </nav>
     </main>
   );

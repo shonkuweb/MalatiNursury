@@ -1,12 +1,26 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { products } from "../data/products";
 
 const CartContext = createContext(null);
 
 export function CartProvider({ children }) {
   const [items, setItems] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [productsLoading, setProductsLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/products")
+      .then(res => res.json())
+      .then(data => {
+        setProducts(data);
+        setProductsLoading(false);
+      })
+      .catch(err => {
+        console.error("Failed to fetch products:", err);
+        setProductsLoading(false);
+      });
+  }, []);
 
   useEffect(() => {
     const saved = localStorage.getItem("blooming-partners-cart");
@@ -57,7 +71,7 @@ export function CartProvider({ children }) {
   );
 
   return (
-    <CartContext.Provider value={{ items: detailedItems, addItem, updateQty, removeItem, clear }}>
+    <CartContext.Provider value={{ items: detailedItems, addItem, updateQty, removeItem, clear, products, productsLoading }}>
       {children}
     </CartContext.Provider>
   );

@@ -1,1 +1,1 @@
-export const categories = ["Seed", "Indoor", "Bougainvillea", "Planters"];
+export const categories = ["Hoya", "Adenium"];

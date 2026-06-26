@@ -16,31 +16,34 @@ import {
 } from "react-icons/fi";
 import { FaLeaf, FaSeedling, FaTree, FaWhatsapp } from "react-icons/fa";
 import { GiFlowerPot, GiFlowerTwirl } from "react-icons/gi";
-import { products } from "./data/products";
-import { categories as menuCategories } from "./data/categories";
+import { categories as defaultCategories } from "./data/categories";
 import SiteFooter from "./components/SiteFooter";
 import { useCart } from "./context/CartContext";
-
-const categories = [
-  { label: "Seed", tone: "tone-a", icon: FaSeedling },
-  { label: "Indoor", tone: "tone-b", icon: GiFlowerPot },
-  { label: "Bougainvillea", tone: "tone-c", active: true, icon: GiFlowerTwirl },
-  { label: "Planters", tone: "tone-d", icon: GiFlowerPot }
-];
-
 
 export default function Home() {
   const heroEndRef = useRef(null);
   const [showBottomNav, setShowBottomNav] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const { addItem } = useCart();
-
-  const filteredProducts = products.filter(p =>
-    p.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const [activeCategoryId, setActiveCategoryId] = useState(null);
+  const [dbCategories, setDbCategories] = useState([]);
+  
+  const { addItem, products, productsLoading } = useCart();
 
   useEffect(() => {
+    fetch("/api/categories")
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setDbCategories(data);
+      })
+      .catch(console.error);
+  }, []);
+
+  const filteredProducts = (products || []).filter(p => {
+    const matchesSearch = p.title?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = activeCategoryId ? p.categoryId === parseInt(activeCategoryId) || p.categoryId === activeCategoryId : true;
+    return matchesSearch && matchesCategory;
+  });
     const checkHero = () => {
       if (!heroEndRef.current) return;
       const heroEndTop = heroEndRef.current.getBoundingClientRect().top;
@@ -74,7 +77,7 @@ export default function Home() {
 
   return (
     <main className="mobile-page">
-      <div className="top-strip">Free Delivery Above ₹4999 | Shop Now</div>
+
 
       <header className="header">
         <button className="icon-btn" aria-label="Open menu" onClick={() => setMenuOpen(true)}>
@@ -103,52 +106,76 @@ export default function Home() {
         </div>
       </div>
 
-      <section className="category-row" aria-label="Plant categories">
-        {categories.map((category) => (
-          <article key={category.label} className="category">
-            <div className={`category-icon ${category.tone}`}>
-              <category.icon />
+      {!searchQuery && (
+        <>
+          <section className="hero">
+            <div className="hero-overlay">
+              <span className="badge">NEW ARRIVALS</span>
+              <h2>Bring Life to Your Home</h2>
+              <p>Explore our curated collection of indoor plants.</p>
+              <button className="cta-btn">Shop Now</button>
             </div>
-            <p className={category.active ? "active-category" : ""}>{category.label}</p>
+          </section>
+          <div ref={heroEndRef} aria-hidden="true" />
+
+          <div className="notice">
+            <p className="notice-track">
+              For product replacement, please record a continuous, single-shot video while opening the package.
+            </p>
+          </div>
+        </>
+      )}
+
+      <section className="category-row" aria-label="Plant categories">
+        {dbCategories.map((category, index) => (
+          <article 
+            key={category.id} 
+            className={`category ${activeCategoryId === category.id ? 'active' : ''}`}
+            onClick={() => setActiveCategoryId(activeCategoryId === category.id ? null : category.id)}
+            style={{cursor: 'pointer'}}
+          >
+            <div className={`category-icon tone-${index % 2 === 0 ? 'a' : 'b'}`} style={{
+              background: activeCategoryId === category.id ? '#187a32' : '',
+              color: activeCategoryId === category.id ? 'white' : ''
+            }}>
+              <FaLeaf />
+            </div>
+            <p style={{ fontWeight: activeCategoryId === category.id ? 'bold' : 'normal', color: activeCategoryId === category.id ? '#187a32' : '' }}>{category.name}</p>
           </article>
         ))}
       </section>
 
-      <section className="hero">
-        <div className="hero-overlay">
-          <span className="badge">NEW ARRIVALS</span>
-          <h2>Bring Life to Your Home</h2>
-          <p>Explore our curated collection of indoor plants.</p>
-          <button className="cta-btn">Shop Now</button>
-        </div>
-      </section>
-      <div ref={heroEndRef} aria-hidden="true" />
-
-      <div className="notice">
-        <p className="notice-track">
-          For product replacement, please record a continuous, single-shot video while opening the package.
-        </p>
-      </div>
-
       <section className="best-sellers">
-        <div className="section-head">
-          <h3>{searchQuery ? "Search Results" : "Best Sellers"}</h3>
-          {!searchQuery && <a href="/">View all</a>}
+        <div className="section-title">
+          <h2>Trending Plants</h2>
+          <Link href="/shop" className="see-all">See all <FiChevronRight /></Link>
         </div>
-        <div className="product-row">
-          {filteredProducts.length > 0 ? (
+
+        <div className="product-grid">
+          {productsLoading ? (
+            <div style={{ textAlign: "center", padding: "40px", color: "#666" }}>Loading plants...</div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-state-icon">
+                <FiSearch />
+              </div>
+              <h4>No plants found</h4>
+              <p>We couldn't find any plants matching your search. Try adjusting your filters or browsing our categories.</p>
+              <button className="clear-search-btn" onClick={() => setSearchQuery("")}>Clear Search</button>
+            </div>
+          ) : (
             filteredProducts.map((product) => (
               <article key={product.title} className="product-card">
                 <span className="offer-pill">{product.offer}</span>
-                <Link href={`/product/${product.slug}`} className="product-image-link">
-                  <div className={`product-image ${product.imageClass}`} />
+                <Link href={`/product/${product.slug}`} className="product-image-link" style={{ display: 'block', overflow: 'hidden' }}>
+                  <img src={product.image} alt={product.title} style={{ width: '100%', height: '200px', objectFit: 'cover' }} />
                 </Link>
                 <div className="product-info">
                   <p className="product-title">{product.title}</p>
-                  <p className="product-rating">☆ ☆ ☆ ☆ ☆ {product.rating} | {product.reviews}</p>
+                  <p className="product-rating">☆ ☆ ☆ ☆ ☆ 5.0 | 120 Reviews</p>
                   <div className="price-row">
-                    <strong>{product.price}</strong>
-                    <span>{product.oldPrice}</span>
+                    <strong>₹{product.price}</strong>
+                    {product.oldPrice && <span>₹{product.oldPrice}</span>}
                   </div>
                   <button className="add-btn" onClick={() => addItem(product.slug, 1)}>
                     Add to Cart
@@ -156,10 +183,6 @@ export default function Home() {
                 </div>
               </article>
             ))
-          ) : (
-            <p style={{ gridColumn: "1 / -1", textAlign: "center", padding: "20px", color: "#666" }}>
-              No products found matching "{searchQuery}".
-            </p>
           )}
         </div>
       </section>
@@ -184,9 +207,7 @@ export default function Home() {
           <Link href="/checkout" onClick={() => setMenuOpen(false)}>
             Checkout <FiChevronRight />
           </Link>
-          <Link href="/product/buttercup" onClick={() => setMenuOpen(false)}>
-            Product Details <FiChevronRight />
-          </Link>
+
         </nav>
         <div className="menu-categories">
           <p>Categories</p>
@@ -223,12 +244,7 @@ export default function Home() {
           </span>
           <span>Cart</span>
         </Link>
-        <Link href="/track-order" className="bottom-item" aria-label="Track order">
-          <span className="bottom-icon">
-            <FiTruck />
-          </span>
-          <span>Track Order</span>
-        </Link>
+        
       </nav>
     </main>
   );

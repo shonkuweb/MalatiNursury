@@ -184,9 +184,7 @@ export default function CheckoutPage() {
           <Link href="/checkout" onClick={() => setMenuOpen(false)}>
             Checkout <FiChevronRight />
           </Link>
-          <Link href="/product/buttercup" onClick={() => setMenuOpen(false)}>
-            Product Details <FiChevronRight />
-          </Link>
+
         </nav>
         <div className="menu-categories">
           <p>Categories</p>
@@ -223,12 +221,7 @@ export default function CheckoutPage() {
           </span>
           <span>Cart</span>
         </Link>
-        <Link href="/track-order" className="bottom-item" aria-label="Track order">
-          <span className="bottom-icon">
-            <FiTruck />
-          </span>
-          <span>Track Order</span>
-        </Link>
+        
       </nav>
     </main>
   );

@@ -44,6 +44,8 @@ export default function Home() {
     const matchesCategory = activeCategoryId ? p.categoryId === parseInt(activeCategoryId) || p.categoryId === activeCategoryId : true;
     return matchesSearch && matchesCategory;
   });
+
+  useEffect(() => {
     const checkHero = () => {
       if (!heroEndRef.current) return;
       const heroEndTop = heroEndRef.current.getBoundingClientRect().top;
@@ -212,9 +214,17 @@ export default function Home() {
         <div className="menu-categories">
           <p>Categories</p>
           <div className="menu-category-grid">
-            {menuCategories.map((item) => (
-              <button key={item} type="button" className="menu-category-item" onClick={() => setMenuOpen(false)}>
-                {item}
+            {dbCategories.map((item) => (
+              <button 
+                key={item.id} 
+                type="button" 
+                className="menu-category-item" 
+                onClick={() => {
+                  setActiveCategoryId(item.id);
+                  setMenuOpen(false);
+                }}
+              >
+                {item.name}
               </button>
             ))}
           </div>

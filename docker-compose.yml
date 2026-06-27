@@ -7,10 +7,26 @@ services:
       dockerfile: Dockerfile
     container_name: bpn-store
     restart: always
-    ports:
-      - "3000:3000"
     volumes:
       # Mount the data folder so JSON files persist if the container restarts
       - ./app/data:/app/app/data
     env_file:
       - .env.local
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: caddy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+
+volumes:
+  caddy_data:
+  caddy_config:

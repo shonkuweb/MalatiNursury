@@ -32,6 +32,7 @@ export async function POST(request) {
 
     return NextResponse.json({ message: 'Product added successfully', product: newProduct }, { status: 201 });
   } catch (error) {
+    console.error("Failed to add product:", error);
     return NextResponse.json({ error: 'Failed to add product' }, { status: 500 });
   }
 }

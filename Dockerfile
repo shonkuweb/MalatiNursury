@@ -40,9 +40,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # We need the data directory for the JSON store to persist
-COPY --from=builder --chown=nextjs:nodejs /app/app/data ./app/data
-
-USER nextjs
+COPY --from=builder /app/app/data ./app/data
 
 EXPOSE 3000
 

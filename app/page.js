@@ -77,6 +77,12 @@ export default function Home() {
     };
   }, [menuOpen]);
 
+  const activeCategory = dbCategories.find(c => c.id === activeCategoryId || c.id === parseInt(activeCategoryId));
+  const isAdenium = activeCategory?.slug?.toLowerCase() === 'adenium' || activeCategory?.name?.toLowerCase() === 'adenium';
+  const heroStyle = isAdenium
+    ? { background: 'url("https://pub-ce8688bc6c654bcfb99716f7c9373bcd.r2.dev/bpn/1782732499136_c85775c1-ac41-427e-85ce-6bb60f9a3a40__1_.png") center/cover no-repeat' }
+    : {};
+
   return (
     <main className="mobile-page">
 
@@ -110,7 +116,7 @@ export default function Home() {
 
       {!searchQuery && (
         <>
-          <section className="hero">
+          <section className="hero" style={heroStyle}>
             <div className="hero-overlay">
               <span className="badge">NEW ARRIVALS</span>
               <h2>Bring Life to Your Home</h2>

@@ -2385,10 +2385,10 @@ body {
   display: none;
 }
 @media (min-width: 768px) {
-  .mobile-app-container {
+  body:not(:has(.admin-container)) .mobile-app-container {
     display: none !important;
   }
-  .desktop-blocker {
+  body:not(:has(.admin-container)) .desktop-blocker {
     display: flex !important;
     flex-direction: column;
     align-items: center;

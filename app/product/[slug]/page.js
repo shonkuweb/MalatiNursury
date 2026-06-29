@@ -84,7 +84,6 @@ export default function ProductPage() {
 
   return (
     <main className="mobile-page product-page">
-      <div className="top-strip">Get 4 Plants @ just ₹699!</div>
 
       <header className="header">
         <button className="icon-btn" aria-label="Open menu" onClick={() => setMenuOpen(true)}>

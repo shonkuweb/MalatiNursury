@@ -18,6 +18,11 @@ export default function AdminPage() {
   const [offer, setOffer] = useState("");
   const [file, setFile] = useState(null);
   const [categoryId, setCategoryId] = useState("");
+  
+  // Adenium options state
+  const [adeniumPrice8, setAdeniumPrice8] = useState("");
+  const [adeniumPrice10, setAdeniumPrice10] = useState("");
+  const [adeniumPriceSingle, setAdeniumPriceSingle] = useState("");
 
   // New category form state
   const [categoryName, setCategoryName] = useState("");
@@ -113,6 +118,13 @@ export default function AdminPage() {
       const imageUrl = uploadData.url;
 
       // 2. Save the product
+      const isAdenium = categories.find(c => c.id == categoryId)?.name === "Adenium";
+      const adeniumOptions = isAdenium ? {
+        "Multigrafted 8\" Pot": adeniumPrice8 || null,
+        "Multigrafted 10\" Pot": adeniumPrice10 || null,
+        "Single Grafted": adeniumPriceSingle || null
+      } : undefined;
+
       const newProduct = {
         slug,
         title,
@@ -122,7 +134,8 @@ export default function AdminPage() {
         image: imageUrl,
         categoryId: categoryId ? parseInt(categoryId) : null,
         rating: 5.0,
-        reviews: 120
+        reviews: 120,
+        adeniumOptions
       };
 
       const productRes = await fetch("/api/products", {
@@ -143,6 +156,9 @@ export default function AdminPage() {
       setOffer("");
       setFile(null);
       setCategoryId("");
+      setAdeniumPrice8("");
+      setAdeniumPrice10("");
+      setAdeniumPriceSingle("");
       
       // 4. Refresh list
       fetchData();
@@ -245,6 +261,26 @@ export default function AdminPage() {
                     ))}
                   </select>
                 </div>
+
+                {categories.find(c => c.id == categoryId)?.name === "Adenium" && (
+                  <div className="form-group" style={{background: '#f9f9f9', padding: '16px', borderRadius: '8px', marginBottom: '16px'}}>
+                    <h3 style={{marginBottom: '12px', fontSize: '16px', color: '#187a32'}}>Adenium Prices (Leave empty if not applicable)</h3>
+                    <div style={{display: 'flex', gap: '12px', flexDirection: 'column'}}>
+                      <div>
+                        <label>Multigrafted 8" Pot (₹)</label>
+                        <input type="number" value={adeniumPrice8} onChange={e => setAdeniumPrice8(e.target.value)} placeholder="e.g. 500" />
+                      </div>
+                      <div>
+                        <label>Multigrafted 10" Pot (₹)</label>
+                        <input type="number" value={adeniumPrice10} onChange={e => setAdeniumPrice10(e.target.value)} placeholder="e.g. 800" />
+                      </div>
+                      <div>
+                        <label>Single Grafted (₹)</label>
+                        <input type="number" value={adeniumPriceSingle} onChange={e => setAdeniumPriceSingle(e.target.value)} placeholder="e.g. 300" />
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <div className="form-row">
                   <div className="form-group">

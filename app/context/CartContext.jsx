@@ -8,6 +8,8 @@ export function CartProvider({ children }) {
   const [items, setItems] = useState([]);
   const [products, setProducts] = useState([]);
   const [productsLoading, setProductsLoading] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     fetch("/api/products")
@@ -37,25 +39,25 @@ export function CartProvider({ children }) {
     localStorage.setItem("blooming-partners-cart", JSON.stringify(items));
   }, [items]);
 
-  const addItem = (slug, qty = 1) => {
+  const addItem = (slug, qty = 1, variant = null) => {
     setItems((prev) => {
-      const found = prev.find((i) => i.slug === slug);
+      const found = prev.find((i) => i.slug === slug && i.variant === variant);
       if (found) {
-        return prev.map((i) => (i.slug === slug ? { ...i, qty: i.qty + qty } : i));
+        return prev.map((i) => (i.slug === slug && i.variant === variant ? { ...i, qty: i.qty + qty } : i));
       }
-      return [...prev, { slug, qty }];
+      return [...prev, { slug, qty, variant }];
     });
   };
 
-  const updateQty = (slug, qty) => {
+  const updateQty = (slug, variant, qty) => {
     if (qty <= 0) {
-      setItems((prev) => prev.filter((i) => i.slug !== slug));
+      setItems((prev) => prev.filter((i) => !(i.slug === slug && i.variant === variant)));
       return;
     }
-    setItems((prev) => prev.map((i) => (i.slug === slug ? { ...i, qty } : i)));
+    setItems((prev) => prev.map((i) => (i.slug === slug && i.variant === variant ? { ...i, qty } : i)));
   };
 
-  const removeItem = (slug) => setItems((prev) => prev.filter((i) => i.slug !== slug));
+  const removeItem = (slug, variant) => setItems((prev) => prev.filter((i) => !(i.slug === slug && i.variant === variant)));
   const clear = () => setItems([]);
 
   const detailedItems = useMemo(
@@ -64,14 +66,18 @@ export function CartProvider({ children }) {
         .map((item) => {
           const product = products.find((p) => p.slug === item.slug);
           if (!product) return null;
-          return { ...product, qty: item.qty };
+          let price = product.price;
+          if (item.variant && product.adeniumOptions && product.adeniumOptions[item.variant]) {
+            price = product.adeniumOptions[item.variant];
+          }
+          return { ...product, qty: item.qty, variant: item.variant, price };
         })
         .filter(Boolean),
-    [items]
+    [items, products]
   );
 
   return (
-    <CartContext.Provider value={{ items: detailedItems, addItem, updateQty, removeItem, clear, products, productsLoading }}>
+    <CartContext.Provider value={{ items: detailedItems, addItem, updateQty, removeItem, clear, products, productsLoading, isSidebarOpen, setIsSidebarOpen, isMenuOpen, setIsMenuOpen }}>
       {children}
     </CartContext.Provider>
   );

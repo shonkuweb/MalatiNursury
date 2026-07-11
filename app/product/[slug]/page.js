@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   FiChevronRight,
@@ -23,22 +23,8 @@ import {
 import { FaWhatsapp, FaLeaf } from "react-icons/fa";
 import { categories as menuCategories } from "../../data/categories";
 import { useCart } from "../../context/CartContext";
-import SiteFooter from "../../components/SiteFooter";
 
-const accordionData = [
-  {
-    title: "Product Description",
-    body: "A lush, hand-picked plant nurtured in our Kolkata nursery. Each plant is healthy, well-rooted and ready to thrive in your home or balcony garden with minimal care."
-  },
-  {
-    title: "Plant Care Tips",
-    body: "Place in bright, indirect sunlight. Water when the top inch of soil feels dry, roughly twice a week. Avoid overwatering and ensure the pot has good drainage."
-  },
-  {
-    title: "Delivery & Returns",
-    body: "Dispatched within 24 hours with safe, breathable packaging. One-day delivery across Kolkata and a 14-day replacement guarantee on every order."
-  }
-];
+
 
 const highlights = [
   "Healthy, well-rooted live plant",
@@ -50,11 +36,24 @@ const highlights = [
 export default function ProductPage() {
   const params = useParams();
   const slug = Array.isArray(params?.slug) ? params.slug[0] : params?.slug;
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [qty, setQty] = useState(1);
+  const [variantQtys, setVariantQtys] = useState({});
   const [openAccordion, setOpenAccordion] = useState(0);
-  const { addItem, products, productsLoading } = useCart();
+  const { addItem, products, productsLoading, setIsSidebarOpen } = useCart();
   const product = products.find((item) => item.slug === slug);
+
+  const accordionData = [
+    {
+      title: "Product Description",
+      body: product?.description || "A lush, hand-picked plant nurtured in our Kolkata nursery. Each plant is healthy, well-rooted and ready to thrive in your home or balcony garden with minimal care."
+    },
+    {
+      title: "Delivery & Returns",
+      body: "Dispatched within 24 hours with safe, breathable packaging. One-day delivery across Kolkata and a 14-day replacement guarantee on every order."
+    }
+  ];
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
@@ -81,6 +80,37 @@ export default function ProductPage() {
 
   const related = products.filter((item) => item.slug !== product.slug).slice(0, 3);
   const ratingValue = Math.round(parseFloat(product.rating));
+  const availableVariants = product?.adeniumOptions ? Object.keys(product.adeniumOptions).filter(k => product.adeniumOptions[k] !== null && product.adeniumOptions[k] !== "") : [];
+
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    if (availableVariants.length > 0) {
+      const selected = Object.entries(variantQtys).filter(([v, q]) => q > 0);
+      if (selected.length === 0) {
+        alert("Please select at least one option.");
+        return;
+      }
+      selected.forEach(([v, q]) => addItem(product.slug, q, v));
+    } else {
+      addItem(product.slug, qty);
+    }
+    router.push('/cart');
+  };
+
+  const handleBuyNow = (e) => {
+    e.preventDefault();
+    if (availableVariants.length > 0) {
+      const selected = Object.entries(variantQtys).filter(([v, q]) => q > 0);
+      if (selected.length === 0) {
+        alert("Please select at least one option.");
+        return;
+      }
+      selected.forEach(([v, q]) => addItem(product.slug, q, v));
+    } else {
+      addItem(product.slug, qty);
+    }
+    router.push('/checkout');
+  };
 
   return (
     <main className="mobile-page product-page">
@@ -93,9 +123,9 @@ export default function ProductPage() {
           Blooming Partners Nursery
         </Link>
         <div className="header-actions">
-          <Link href="/cart" className="icon-btn" aria-label="Shopping bag">
+          <button className="icon-btn" aria-label="Shopping bag" onClick={() => setIsSidebarOpen(true)}>
             <FiShoppingBag />
-          </Link>
+          </button>
         </div>
       </header>
 
@@ -139,11 +169,18 @@ export default function ProductPage() {
         <p className="urgent-pill">🔥 36 sold in the last 24 hours</p>
 
         <div className="price-row">
-          <strong>₹{product.price}</strong>
-          {product.oldPrice && <span>₹{product.oldPrice}</span>}
-          <em className="offer-pill inline">{product.offer}</em>
+          {!availableVariants.length && (
+            <>
+              <strong>₹{product.price}</strong>
+              {product.oldPrice && <span>₹{product.oldPrice}</span>}
+              <em className="offer-pill inline">{product.offer}</em>
+            </>
+          )}
+          {availableVariants.length > 0 && (
+            <em className="offer-pill inline">{product.offer}</em>
+          )}
         </div>
-        <p className="tax-note">Inclusive of all taxes · Free delivery above ₹4999</p>
+        <p className="tax-note">Inclusive of all taxes</p>
         <p className="viewing-now">👀 12 people are viewing this right now</p>
 
         <ul className="highlight-list">
@@ -160,41 +197,52 @@ export default function ProductPage() {
           </div>
         </div>
 
-        <div className="qty-row">
-          <span>Qty:</span>
-          <div className="qty-box">
-            <button type="button" aria-label="Decrease quantity" onClick={() => setQty((q) => Math.max(1, q - 1))}>
-              <FiMinus />
-            </button>
-            <strong>{qty}</strong>
-            <button type="button" aria-label="Increase quantity" onClick={() => setQty((q) => q + 1)}>
-              <FiPlus />
-            </button>
+        {availableVariants.length > 0 ? (
+          <div className="variants-section" style={{marginBottom: '20px', padding: '16px', background: '#f5f8f6', borderRadius: '8px'}}>
+            <h3 style={{marginBottom: '12px', fontSize: '16px'}}>Select Options:</h3>
+            {availableVariants.map(variant => {
+              const vQty = variantQtys[variant] || 0;
+              return (
+                <div key={variant} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px'}}>
+                  <div>
+                    <strong>{variant}</strong>
+                    <div style={{fontSize: '14px', color: '#1f6b2c'}}>₹{product.adeniumOptions[variant]}</div>
+                  </div>
+                  <div className="qty-box" style={{margin: 0}}>
+                    <button type="button" aria-label="Decrease quantity" onClick={() => setVariantQtys(prev => ({...prev, [variant]: Math.max(0, (prev[variant] || 0) - 1)}))}>
+                      <FiMinus />
+                    </button>
+                    <strong>{vQty}</strong>
+                    <button type="button" aria-label="Increase quantity" onClick={() => setVariantQtys(prev => ({...prev, [variant]: (prev[variant] || 0) + 1}))}>
+                      <FiPlus />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        </div>
+        ) : (
+          <div className="qty-row">
+            <span>Qty:</span>
+            <div className="qty-box">
+              <button type="button" aria-label="Decrease quantity" onClick={() => setQty((q) => Math.max(1, q - 1))}>
+                <FiMinus />
+              </button>
+              <strong>{qty}</strong>
+              <button type="button" aria-label="Increase quantity" onClick={() => setQty((q) => q + 1)}>
+                <FiPlus />
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="cta-row">
-          <Link href="/cart" className="add-btn ghost" onClick={() => addItem(product.slug, qty)}>
+          <button onClick={handleAddToCart} className="add-btn ghost">
             Add to Cart
-          </Link>
-          <Link href="/checkout" className="add-btn" onClick={() => addItem(product.slug, qty)}>
+          </button>
+          <button onClick={handleBuyNow} className="add-btn">
             Buy It Now
-          </Link>
-        </div>
-
-        <div className="trust-row">
-          <div className="trust-item">
-            <FiTruck />
-            <span>1-Day Delivery</span>
-          </div>
-          <div className="trust-item">
-            <FiShield />
-            <span>14-Day Replacement</span>
-          </div>
-          <div className="trust-item">
-            <FaLeaf />
-            <span>Expert Guidance</span>
-          </div>
+          </button>
         </div>
       </section>
 
@@ -233,8 +281,6 @@ export default function ProductPage() {
         </div>
       </section>
 
-      <SiteFooter />
-
       {menuOpen && <button className="menu-overlay" aria-label="Close menu overlay" onClick={() => setMenuOpen(false)} />}
       <aside className={`side-menu ${menuOpen ? "open" : ""}`} aria-label="Website menu">
         <div className="side-menu-head">
@@ -247,9 +293,12 @@ export default function ProductPage() {
           <Link href="/" onClick={() => setMenuOpen(false)}>
             Home <FiChevronRight />
           </Link>
-          <Link href="/cart" onClick={() => setMenuOpen(false)}>
+          <button type="button" className="side-menu-link-btn" onClick={() => {
+            setMenuOpen(false);
+            setIsSidebarOpen(true);
+          }}>
             Cart <FiChevronRight />
-          </Link>
+          </button>
           <Link href="/checkout" onClick={() => setMenuOpen(false)}>
             Checkout <FiChevronRight />
           </Link>
@@ -267,10 +316,6 @@ export default function ProductPage() {
         </div>
       </aside>
 
-      <button className="whatsapp-fab" aria-label="WhatsApp">
-        <FaWhatsapp />
-      </button>
-
       <nav className="bottom-nav visible" aria-label="Primary navigation">
         <Link href="/" className="bottom-item" aria-label="Home">
           <span className="bottom-icon">
@@ -284,12 +329,18 @@ export default function ProductPage() {
           </span>
           <span>Menu</span>
         </button>
-        <Link href="/cart" className="bottom-item" aria-label="Cart">
+        <button className="bottom-item" type="button" aria-label="Cart" onClick={() => setIsSidebarOpen(true)}>
           <span className="bottom-icon">
             <FiPackage />
           </span>
           <span>Cart</span>
-        </Link>
+        </button>
+        <a href="https://wa.me/919836820811" className="bottom-item" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+          <span className="bottom-icon" style={{ color: '#25D366' }}>
+            <FaWhatsapp />
+          </span>
+          <span>WhatsApp</span>
+        </a>
         
       </nav>
     </main>

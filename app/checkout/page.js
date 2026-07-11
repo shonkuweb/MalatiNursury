@@ -9,13 +9,14 @@ import {
   FiHome,
   FiLock,
   FiPackage,
-  FiTruck,
-  FiX
+  FiX,
+  FiShield,
+  FiCheckCircle,
+  FiTruck
 } from "react-icons/fi";
 import { FaWhatsapp } from "react-icons/fa";
 import { useCart } from "../context/CartContext";
 import { categories as menuCategories } from "../data/categories";
-import SiteFooter, { PaymentCards } from "../components/SiteFooter";
 
 const FREE_DELIVERY_THRESHOLD = 4999;
 const DELIVERY_CHARGE = 40;
@@ -27,8 +28,17 @@ const toAmount = (value) => {
 export default function CheckoutPage() {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
-  const { items: cartItems, clear } = useCart();
+  const { items: cartItems, clear, setIsSidebarOpen } = useCart();
   const [form, setForm] = useState({ name: "", phone: "", pincode: "", address: "" });
+  const [selectedAdeniumOptions, setSelectedAdeniumOptions] = useState([]);
+
+  const hasAdenium = cartItems.some(item => item.title?.toLowerCase().includes('adenium') || item.slug?.toLowerCase().includes('adenium'));
+
+  const ADENIUM_CHECKOUT_OPTIONS = [
+    'Addenium Multigrafted 8" Pot 1200',
+    'Addenium Multigrafted 10" Pot 1500',
+    'Addenium Single grafted 150'
+  ];
 
   const itemTotal = cartItems.reduce((sum, i) => sum + toAmount(i.price) * i.qty, 0);
   const deliveryCharge = cartItems.length === 0 || itemTotal >= FREE_DELIVERY_THRESHOLD ? 0 : DELIVERY_CHARGE;
@@ -52,7 +62,11 @@ export default function CheckoutPage() {
       alert("Please fill in all delivery details.");
       return;
     }
-    const orderId = `KN-${Date.now().toString().slice(-6)}`;
+    if (hasAdenium && selectedAdeniumOptions.length === 0) {
+      alert("Please select at least one Adenium option.");
+      return;
+    }
+    const orderId = `BPN-${Date.now().toString().slice(-6)}`;
     const order = {
       id: orderId,
       customer: form.name.trim(),
@@ -85,6 +99,13 @@ export default function CheckoutPage() {
     message += `*Delivery Charge:* ${deliveryCharge === 0 ? "FREE" : `Rs. ${deliveryCharge.toFixed(2)}`}\n`;
     message += `*Total Payable:* Rs. ${grandTotal.toFixed(2)}`;
 
+    if (hasAdenium && selectedAdeniumOptions.length > 0) {
+      message += `\n\n*Selected Adenium Options:*\n`;
+      selectedAdeniumOptions.forEach(opt => {
+        message += `✅ ${opt}\n`;
+      });
+    }
+
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/919836820811?text=${encodedMessage}`;
     
@@ -96,77 +117,118 @@ export default function CheckoutPage() {
   };
 
   return (
-    <main className="mobile-page product-page">
-      <section className="checkout-shell">
-        <div className="secure-pill">
+    <main className="mobile-page">
+      <section className="checkout-shell-modern">
+        <div className="secure-pill-modern">
           <FiLock /> Secure Checkout
         </div>
-        <h1>Checkout</h1>
+        
+        <h1>Complete Your Order</h1>
+        
         {cartItems.length === 0 && <p className="empty-small">Your cart is empty.</p>}
-        <div className="checkout-card">
+        
+        <div className="checkout-card-modern">
           <div className="card-head">
             <h3>
-              <span className="step-badge">1</span>Delivery Address
+              <span className="step-badge-modern">1</span>Delivery Details
             </h3>
-            <span className="sub-muted">Delivered in 1-3 days</span>
           </div>
-          <input placeholder="Full Name" value={form.name} onChange={updateField("name")} />
-          <input placeholder="Phone Number" value={form.phone} onChange={updateField("phone")} />
-          <input placeholder="Pincode" value={form.pincode} onChange={updateField("pincode")} />
-          <textarea placeholder="Full Address" rows={3} value={form.address} onChange={updateField("address")} />
+          <input className="checkout-input-modern" placeholder="Full Name" value={form.name} onChange={updateField("name")} />
+          <input className="checkout-input-modern" placeholder="Phone Number" type="tel" value={form.phone} onChange={updateField("phone")} />
+          <input className="checkout-input-modern" placeholder="Pincode" type="number" value={form.pincode} onChange={updateField("pincode")} />
+          <textarea className="checkout-input-modern" placeholder="Full Address (House No, Street, Landmark)" rows={3} value={form.address} onChange={updateField("address")} style={{ marginBottom: 0 }} />
         </div>
 
-        <div className="bill-card">
-          <h3>
-            <span className="step-badge">2</span>Order Summary
-          </h3>
+        {hasAdenium && (
+          <div className="checkout-card-modern">
+            <div className="card-head">
+              <h3>
+                <span className="step-badge-modern" style={{ background: 'linear-gradient(135deg, #f1512f 0%, #c43212 100%)' }}>!</span>
+                Adenium Options
+              </h3>
+            </div>
+            <p style={{ fontSize: '14px', marginBottom: '16px', color: '#666', lineHeight: 1.5 }}>
+              Please select your preferred Adenium pot sizes (you can choose multiple):
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {ADENIUM_CHECKOUT_OPTIONS.map((opt) => {
+                const isSelected = selectedAdeniumOptions.includes(opt);
+                return (
+                  <label key={opt} className={`adenium-option-modern ${isSelected ? 'selected' : ''}`}>
+                    <input
+                      type="checkbox"
+                      className="adenium-checkbox-modern"
+                      checked={isSelected}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedAdeniumOptions(prev => [...prev, opt]);
+                        } else {
+                          setSelectedAdeniumOptions(prev => prev.filter(o => o !== opt));
+                        }
+                      }}
+                    />
+                    {opt}
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        <div className="checkout-card-modern bill-card-modern">
+          <div className="card-head">
+            <h3>
+              <span className="step-badge-modern">2</span>Order Summary
+            </h3>
+          </div>
+          
           {cartItems.length === 0 && <p className="empty-small">No products selected.</p>}
-          <div className="order-lines">
+          
+          <div className="order-lines-modern">
             {cartItems.map((item) => (
-              <div className="order-line" key={item.slug}>
-                <div className={`order-line-thumb ${item.imageClass}`} />
-                <div className="order-line-info">
+              <div className="order-line-modern" key={`${item.slug}-${item.variant || 'base'}`}>
+                <div className={`cart-item-img ${item.imageClass}`} style={{ width: 64, height: 64 }} />
+                <div className="order-line-info-modern">
                   <p>{item.title}</p>
-                  <span>
-                    {item.price} × {item.qty}
-                  </span>
+                  <span>Variant: {item.variant || 'Base'} • Qty: {item.qty}</span>
                 </div>
-                <strong className="order-line-total">Rs. {(toAmount(item.price) * item.qty).toFixed(2)}</strong>
+                <strong className="order-line-total-modern">
+                  Rs. {(toAmount(item.price) * item.qty).toFixed(2)}
+                </strong>
               </div>
             ))}
           </div>
-          <p>
-            <span>Item Total</span>
-            <strong>Rs. {itemTotal.toFixed(2)}</strong>
-          </p>
-          <p>
-            <span>Delivery Charge</span>
-            <strong>{deliveryCharge === 0 ? "FREE" : `Rs. ${deliveryCharge.toFixed(2)}`}</strong>
-          </p>
-          <p className="bill-total">
-            <span>Total Payable</span>
-            <strong>Rs. {grandTotal.toFixed(2)}</strong>
-          </p>
+
+          <div style={{ marginTop: '20px' }}>
+            <div className="bill-summary-row">
+              <span>Item Total</span>
+              <strong>Rs. {itemTotal.toFixed(2)}</strong>
+            </div>
+            <div className="bill-summary-row">
+              <span>Delivery Charge</span>
+              <strong>{deliveryCharge === 0 ? "FREE" : `Rs. ${deliveryCharge.toFixed(2)}`}</strong>
+            </div>
+            <div className="bill-total-row">
+              <span>Total Payable</span>
+              <strong>Rs. {grandTotal.toFixed(2)}</strong>
+            </div>
+          </div>
         </div>
 
-        <div className="info-block">
-          <p>🚚 One Day Delivery in Kolkata</p>
-          <p>🛡️ 14-Day Replacement | Expert Guidance</p>
-          <p>📦 Safe Packaging | Free Delivery above ₹4999</p>
-        </div>
 
-        <button type="button" className="add-btn cart-checkout-btn checkout-place-btn" onClick={placeOrder}>
-          <span>Place Order on WhatsApp</span>
-          {cartItems.length > 0 && <span className="checkout-place-total">Rs. {grandTotal.toFixed(2)}</span>}
+        <button type="button" className="checkout-btn-whatsapp-modern" onClick={placeOrder}>
+          <div className="checkout-btn-whatsapp-content">
+            <FaWhatsapp size={24} />
+            <span>Order via WhatsApp</span>
+          </div>
+          {cartItems.length > 0 && <span>Rs. {grandTotal.toFixed(2)}</span>}
         </button>
-        <p className="checkout-secure-note">
-          <FaWhatsapp /> Place order directly via WhatsApp
+        <p className="checkout-secure-note-modern">
+          <FiLock /> Your order will be placed securely via WhatsApp
         </p>
       </section>
 
-      <SiteFooter />
-
-      {menuOpen && <button className="menu-overlay" aria-label="Close menu overlay" onClick={() => setMenuOpen(false)} />}
+      {menuOpen && <button className="menu-overlay blur-overlay" aria-label="Close menu overlay" onClick={() => setMenuOpen(false)} />}
       <aside className={`side-menu ${menuOpen ? "open" : ""}`} aria-label="Website menu">
         <div className="side-menu-head">
           <strong>Menu</strong>
@@ -178,13 +240,15 @@ export default function CheckoutPage() {
           <Link href="/" onClick={() => setMenuOpen(false)}>
             Home <FiChevronRight />
           </Link>
-          <Link href="/cart" onClick={() => setMenuOpen(false)}>
+          <button type="button" className="side-menu-link-btn" onClick={() => {
+            setMenuOpen(false);
+            setIsSidebarOpen(true);
+          }}>
             Cart <FiChevronRight />
-          </Link>
+          </button>
           <Link href="/checkout" onClick={() => setMenuOpen(false)}>
             Checkout <FiChevronRight />
           </Link>
-
         </nav>
         <div className="menu-categories">
           <p>Categories</p>
@@ -197,10 +261,6 @@ export default function CheckoutPage() {
           </div>
         </div>
       </aside>
-
-      <button className="whatsapp-fab" aria-label="WhatsApp">
-        <FaWhatsapp />
-      </button>
 
       <nav className="bottom-nav visible" aria-label="Primary navigation">
         <Link href="/" className="bottom-item" aria-label="Home">
@@ -215,13 +275,18 @@ export default function CheckoutPage() {
           </span>
           <span>Menu</span>
         </button>
-        <Link href="/cart" className="bottom-item" aria-label="Cart">
+        <button className="bottom-item" type="button" aria-label="Cart" onClick={() => setIsSidebarOpen(true)}>
           <span className="bottom-icon">
             <FiPackage />
           </span>
           <span>Cart</span>
-        </Link>
-        
+        </button>
+        <a href="https://wa.me/919836820811" className="bottom-item" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+          <span className="bottom-icon" style={{ color: '#25D366' }}>
+            <FaWhatsapp />
+          </span>
+          <span>WhatsApp</span>
+        </a>
       </nav>
     </main>
   );

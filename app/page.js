@@ -17,7 +17,6 @@ import {
 import { FaLeaf, FaSeedling, FaTree, FaWhatsapp } from "react-icons/fa";
 import { GiFlowerPot, GiFlowerTwirl } from "react-icons/gi";
 import { categories as defaultCategories } from "./data/categories";
-import SiteFooter from "./components/SiteFooter";
 import { useCart } from "./context/CartContext";
 
 export default function Home() {
@@ -28,7 +27,7 @@ export default function Home() {
   const [activeCategoryId, setActiveCategoryId] = useState(null);
   const [dbCategories, setDbCategories] = useState([]);
   
-  const { addItem, products, productsLoading } = useCart();
+  const { addItem, products, productsLoading, setIsSidebarOpen } = useCart();
 
   useEffect(() => {
     fetch("/api/categories")
@@ -95,7 +94,7 @@ export default function Home() {
           Blooming Partners Nursery
         </Link>
         <div className="header-actions">
-          <button className="icon-btn" aria-label="Shopping bag">
+          <button className="icon-btn" aria-label="Shopping bag" onClick={() => setIsSidebarOpen(true)}>
             <FiShoppingBag />
           </button>
         </div>
@@ -138,17 +137,13 @@ export default function Home() {
         {dbCategories.map((category, index) => (
           <article 
             key={category.id} 
-            className={`category ${activeCategoryId === category.id ? 'active' : ''}`}
+            className={`category-modern ${activeCategoryId === category.id ? 'active' : ''}`}
             onClick={() => setActiveCategoryId(activeCategoryId === category.id ? null : category.id)}
-            style={{cursor: 'pointer'}}
           >
-            <div className={`category-icon tone-${index % 2 === 0 ? 'a' : 'b'}`} style={{
-              background: activeCategoryId === category.id ? '#187a32' : '',
-              color: activeCategoryId === category.id ? 'white' : ''
-            }}>
+            <div className={`category-icon-modern tone-${index % 2 === 0 ? 'a' : 'b'}`}>
               <FaLeaf />
             </div>
-            <p style={{ fontWeight: activeCategoryId === category.id ? 'bold' : 'normal', color: activeCategoryId === category.id ? '#187a32' : '' }}>{category.name}</p>
+            <p>{category.name}</p>
           </article>
         ))}
       </section>
@@ -156,7 +151,7 @@ export default function Home() {
       <section className="best-sellers">
         <div className="section-title">
           <h2>Trending Plants</h2>
-          <Link href="/shop" className="see-all">See all <FiChevronRight /></Link>
+
         </div>
 
         <div className="product-grid">
@@ -195,8 +190,6 @@ export default function Home() {
         </div>
       </section>
 
-      <SiteFooter />
-
       {menuOpen && <button className="menu-overlay" aria-label="Close menu overlay" onClick={() => setMenuOpen(false)} />}
       <aside className={`side-menu ${menuOpen ? "open" : ""}`} aria-label="Website menu">
         <div className="side-menu-head">
@@ -209,9 +202,12 @@ export default function Home() {
           <Link href="/" onClick={() => setMenuOpen(false)}>
             Home <FiChevronRight />
           </Link>
-          <Link href="/cart" onClick={() => setMenuOpen(false)}>
+          <button type="button" className="side-menu-link-btn" onClick={() => {
+            setMenuOpen(false);
+            setIsSidebarOpen(true);
+          }}>
             Cart <FiChevronRight />
-          </Link>
+          </button>
           <Link href="/checkout" onClick={() => setMenuOpen(false)}>
             Checkout <FiChevronRight />
           </Link>
@@ -237,9 +233,7 @@ export default function Home() {
         </div>
       </aside>
 
-      <button className="whatsapp-fab" aria-label="WhatsApp">
-        <FaWhatsapp />
-      </button>
+
 
       <nav className={`bottom-nav ${showBottomNav ? "visible" : ""}`} aria-label="Primary navigation">
         <Link href="/" className="bottom-item" aria-label="Home">
@@ -254,13 +248,18 @@ export default function Home() {
           </span>
           <span>Menu</span>
         </button>
-        <Link href="/cart" className="bottom-item" aria-label="Cart">
+        <button className="bottom-item" type="button" aria-label="Cart" onClick={() => setIsSidebarOpen(true)}>
           <span className="bottom-icon">
             <FiPackage />
           </span>
           <span>Cart</span>
-        </Link>
-        
+        </button>
+        <a href="https://wa.me/919836820811" className="bottom-item" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+          <span className="bottom-icon" style={{ color: '#25D366' }}>
+            <FaWhatsapp />
+          </span>
+          <span>WhatsApp</span>
+        </a>
       </nav>
     </main>
   );

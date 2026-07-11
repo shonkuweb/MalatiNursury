@@ -187,7 +187,14 @@ export default function CheckoutPage() {
           <div className="order-lines-modern">
             {cartItems.map((item) => (
               <div className="order-line-modern" key={`${item.slug}-${item.variant || 'base'}`}>
-                <div className={`cart-item-img ${item.imageClass}`} style={{ width: 64, height: 64 }} />
+                <div 
+                  className={`cart-item-img ${item.imageClass || ''}`} 
+                  style={{ 
+                    width: 64, 
+                    height: 64, 
+                    ...(item.image ? { backgroundImage: `url(${item.image})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {})
+                  }} 
+                />
                 <div className="order-line-info-modern">
                   <p>{item.title}</p>
                   <span>Variant: {item.variant || 'Base'} • Qty: {item.qty}</span>

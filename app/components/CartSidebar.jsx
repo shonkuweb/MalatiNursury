@@ -45,7 +45,10 @@ export default function CartSidebar() {
             <div className="cart-items-list">
               {cartItems.map((item) => (
                 <article className="cart-item-modern" key={`${item.slug}-${item.variant || 'base'}`}>
-                  <div className={`cart-item-img ${item.imageClass}`} />
+                  <div 
+                    className={`cart-item-img ${item.imageClass || ''}`} 
+                    style={item.image ? { backgroundImage: `url(${item.image})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
+                  />
                   <div className="cart-item-details">
                     <div className="cart-item-header">
                       <p className="cart-item-title">{item.title}</p>

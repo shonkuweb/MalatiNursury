@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { FiUpload, FiTrash2, FiPlus, FiTag } from "react-icons/fi";
 import Link from "next/link";
+import imageCompression from 'browser-image-compression';
 
 export default function AdminPage() {
   const [products, setProducts] = useState([]);
@@ -101,9 +102,16 @@ export default function AdminPage() {
     setIsUploading(true);
 
     try {
-      // 1. Upload the image
+      // 1. Compress and Upload the image
+      const options = {
+        maxSizeMB: 0.5,
+        maxWidthOrHeight: 1200,
+        useWebWorker: true
+      };
+      const compressedFile = await imageCompression(file, options);
+      
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", new File([compressedFile], file.name, { type: compressedFile.type }));
 
       const uploadRes = await fetch("/api/upload", {
         method: "POST",

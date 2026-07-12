@@ -33,6 +33,21 @@ export default function AdminPage() {
     fetchData();
   }, []);
 
+  // Temporary feature: auto-select Hoya category on load
+  useEffect(() => {
+    if (categories.length > 0 && !categoryId) {
+      const hoyaCat = categories.find(c => c.name.toLowerCase() === 'hoya');
+      if (hoyaCat) {
+        setCategoryId(hoyaCat.id.toString());
+        setTitle('Hoya');
+        setSlug('hoya');
+        setPrice('450');
+        setOldPrice('650');
+        setOffer('20% OFF');
+      }
+    }
+  }, [categories, categoryId]);
+
   const fetchData = async () => {
     try {
       const [prodRes, catRes] = await Promise.all([

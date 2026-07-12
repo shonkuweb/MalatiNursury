@@ -40,7 +40,7 @@ export default function AdminPage() {
       if (hoyaCat) {
         setCategoryId(hoyaCat.id.toString());
         setTitle('Hoya');
-        setSlug('hoya');
+        setSlug(`hoya-${Date.now()}`);
         setPrice('450');
         setOldPrice('650');
         setOffer('20% OFF');
@@ -283,7 +283,7 @@ export default function AdminPage() {
                       const selectedCat = categories.find(c => c.id == newCatId);
                       if (selectedCat && selectedCat.name.toLowerCase() === 'hoya') {
                         setTitle('Hoya');
-                        setSlug('hoya');
+                        setSlug(`hoya-${Date.now()}`);
                         setPrice('450');
                         setOldPrice('650');
                         setOffer('20% OFF');
@@ -382,7 +382,7 @@ export default function AdminPage() {
             ) : (
               <div className="admin-product-list">
                 {products.map(product => (
-                  <div key={product.slug} className="admin-product-item">
+                  <div key={product.id || product.slug} className="admin-product-item">
                     <div className="admin-product-image">
                       <img src={product.image} alt={product.title} />
                     </div>

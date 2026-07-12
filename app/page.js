@@ -168,7 +168,7 @@ export default function Home() {
             </div>
           ) : (
             filteredProducts.map((product) => (
-              <article key={product.title} className="product-card">
+              <article key={product.id || product.slug} className="product-card">
                 <span className="offer-pill">{product.offer}</span>
                 <Link href={`/product/${product.slug}`} className="product-image-link" style={{ display: 'block', overflow: 'hidden' }}>
                   <img src={product.image} alt={product.title} style={{ width: '100%', height: '200px', objectFit: 'cover' }} />

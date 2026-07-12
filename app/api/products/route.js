@@ -15,7 +15,26 @@ function readProducts() {
 }
 
 export async function GET() {
-  const products = readProducts();
+  let products = readProducts();
+  let changed = false;
+  
+  const slugCounts = {};
+  for (let i = 0; i < products.length; i++) {
+    const slug = products[i].slug;
+    if (!slugCounts[slug]) {
+      slugCounts[slug] = 1;
+    } else {
+      slugCounts[slug]++;
+      // Generate a unique slug for duplicates
+      products[i].slug = `${slug}-${Date.now()}-${slugCounts[slug]}`;
+      changed = true;
+    }
+  }
+
+  if (changed) {
+    fs.writeFileSync(dataFilePath, JSON.stringify(products, null, 2));
+  }
+
   return NextResponse.json(products);
 }
 

@@ -252,7 +252,20 @@ export default function AdminPage() {
                   <label>Category</label>
                   <select 
                     value={categoryId} 
-                    onChange={(e) => setCategoryId(e.target.value)}
+                    onChange={(e) => {
+                      const newCatId = e.target.value;
+                      setCategoryId(newCatId);
+                      
+                      // Temporary feature for Hoya category
+                      const selectedCat = categories.find(c => c.id == newCatId);
+                      if (selectedCat && selectedCat.name.toLowerCase() === 'hoya') {
+                        setTitle('Hoya');
+                        setSlug('hoya');
+                        setPrice('450');
+                        setOldPrice('650');
+                        setOffer('20% OFF');
+                      }
+                    }}
                     style={{width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #cde2d3'}}
                   >
                     <option value="">Select a Category (Optional)</option>

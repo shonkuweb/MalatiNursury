@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { FiUpload, FiTrash2, FiPlus, FiTag } from "react-icons/fi";
+import { FiUpload, FiTrash2, FiPlus, FiTag, FiEdit2 } from "react-icons/fi";
 import Link from "next/link";
 import imageCompression from 'browser-image-compression';
 
@@ -10,6 +10,10 @@ export default function AdminPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [isAddingCategory, setIsAddingCategory] = useState(false);
+  
+  // Edit mode state
+  const [editingProductId, setEditingProductId] = useState(null);
+  const [existingImage, setExistingImage] = useState("");
   
   // New product form state
   const [title, setTitle] = useState("");
@@ -107,38 +111,85 @@ export default function AdminPage() {
     }
   };
 
+  const handleEditProduct = (product) => {
+    setEditingProductId(product.id);
+    setTitle(product.title);
+    setSlug(product.slug);
+    setPrice(product.price);
+    setOldPrice(product.oldPrice || "");
+    setOffer(product.offer || "");
+    setExistingImage(product.image);
+    setCategoryId(product.categoryId ? product.categoryId.toString() : "");
+    setFile(null);
+
+    if (product.adeniumOptions) {
+      setAdeniumPrice8(product.adeniumOptions["Multigrafted 8\" Pot"] || "");
+      setAdeniumPrice10(product.adeniumOptions["Multigrafted 10\" Pot"] || "");
+      setAdeniumPriceSingle(product.adeniumOptions["Single Grafted"] || "");
+    } else {
+      setAdeniumPrice8("");
+      setAdeniumPrice10("");
+      setAdeniumPriceSingle("");
+    }
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingProductId(null);
+    setTitle("");
+    setSlug("");
+    setPrice("");
+    setOldPrice("");
+    setOffer("");
+    setExistingImage("");
+    setFile(null);
+    setCategoryId("");
+    setAdeniumPrice8("");
+    setAdeniumPrice10("");
+    setAdeniumPriceSingle("");
+  };
+
   const handleSubmitProduct = async (e) => {
     e.preventDefault();
-    if (!title || !slug || !price || !file) {
-      alert("Title, Slug, Price, and Image are required!");
+    if (!title || !slug || !price) {
+      alert("Title, Slug, and Price are required!");
+      return;
+    }
+    if (!editingProductId && !file) {
+      alert("Image is required for new products!");
       return;
     }
 
     setIsUploading(true);
 
     try {
-      // 1. Compress and Upload the image
-      const options = {
-        maxSizeMB: 0.5,
-        maxWidthOrHeight: 1200,
-        useWebWorker: true
-      };
-      const compressedFile = await imageCompression(file, options);
-      
-      const formData = new FormData();
-      formData.append("file", new File([compressedFile], file.name, { type: compressedFile.type }));
+      let imageUrl = existingImage;
 
-      const uploadRes = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-      const uploadData = await uploadRes.json();
+      // 1. Compress and Upload the image if a new file is selected
+      if (file) {
+        const options = {
+          maxSizeMB: 0.5,
+          maxWidthOrHeight: 1200,
+          useWebWorker: true
+        };
+        const compressedFile = await imageCompression(file, options);
+        
+        const formData = new FormData();
+        formData.append("file", new File([compressedFile], file.name, { type: compressedFile.type }));
 
-      if (!uploadRes.ok) {
-        throw new Error(uploadData.error || "Failed to upload image");
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+        const uploadData = await uploadRes.json();
+
+        if (!uploadRes.ok) {
+          throw new Error(uploadData.error || "Failed to upload image");
+        }
+
+        imageUrl = uploadData.url;
       }
-
-      const imageUrl = uploadData.url;
 
       // 2. Save the product
       const isAdenium = categories.find(c => c.id == categoryId)?.name === "Adenium";
@@ -148,7 +199,7 @@ export default function AdminPage() {
         "Single Grafted": adeniumPriceSingle || null
       } : undefined;
 
-      const newProduct = {
+      const productData = {
         slug,
         title,
         price,
@@ -161,31 +212,32 @@ export default function AdminPage() {
         adeniumOptions
       };
 
-      const productRes = await fetch("/api/products", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newProduct),
-      });
+      let res;
+      if (editingProductId) {
+        productData.id = editingProductId;
+        res = await fetch("/api/products", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(productData),
+        });
+      } else {
+        res = await fetch("/api/products", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(productData),
+        });
+      }
 
-      if (!productRes.ok) {
-        throw new Error("Failed to save product");
+      if (!res.ok) {
+        throw new Error(`Failed to ${editingProductId ? 'update' : 'save'} product`);
       }
 
       // 3. Reset form
-      setTitle("");
-      setSlug("");
-      setPrice("");
-      setOldPrice("");
-      setOffer("");
-      setFile(null);
-      setCategoryId("");
-      setAdeniumPrice8("");
-      setAdeniumPrice10("");
-      setAdeniumPriceSingle("");
+      handleCancelEdit();
       
       // 4. Refresh list
       fetchData();
-      alert("Product added successfully!");
+      alert(`Product ${editingProductId ? 'updated' : 'added'} successfully!`);
 
     } catch (err) {
       console.error(err);
@@ -247,7 +299,7 @@ export default function AdminPage() {
             </section>
 
             <section className="admin-card add-product-section">
-              <h2><FiPlus /> Add New Product</h2>
+              <h2><FiPlus /> {editingProductId ? "Edit Product" : "Add New Product"}</h2>
               <form onSubmit={handleSubmitProduct} className="admin-form">
                 <div className="form-group">
                   <label>Product Title</label>
@@ -357,18 +409,25 @@ export default function AdminPage() {
                       type="file" 
                       accept="image/*" 
                       onChange={(e) => setFile(e.target.files[0])} 
-                      required 
+                      required={!editingProductId}
                       id="file-upload"
                     />
                     <label htmlFor="file-upload" className="file-upload-label">
-                      <FiUpload /> {file ? file.name : "Choose an image to upload..."}
+                      <FiUpload /> {file ? file.name : (editingProductId ? "Choose a new image (optional)..." : "Choose an image to upload...")}
                     </label>
                   </div>
                 </div>
 
-                <button type="submit" className="admin-submit-btn" disabled={isUploading}>
-                  {isUploading ? "Uploading & Saving..." : "Save Product"}
-                </button>
+                <div style={{display: 'flex', gap: '12px'}}>
+                  <button type="submit" className="admin-submit-btn" disabled={isUploading} style={{flex: 1}}>
+                    {isUploading ? "Saving..." : (editingProductId ? "Update Product" : "Save Product")}
+                  </button>
+                  {editingProductId && (
+                    <button type="button" onClick={handleCancelEdit} style={{padding: '12px 24px', background: '#666', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold'}}>
+                      Cancel Edit
+                    </button>
+                  )}
+                </div>
               </form>
             </section>
           </div>
@@ -391,13 +450,24 @@ export default function AdminPage() {
                       <p>₹{product.price} {product.oldPrice && <span>(was ₹{product.oldPrice})</span>}</p>
                       {product.category_name && <span style={{fontSize: '12px', background: '#eaf4ee', color: '#187a32', padding: '2px 8px', borderRadius: '12px', display: 'inline-block', marginTop: '4px'}}>{product.category_name}</span>}
                     </div>
-                    <button 
-                      onClick={() => handleDeleteProduct(product.slug)} 
-                      className="admin-delete-btn"
-                      title="Delete Product"
-                    >
-                      <FiTrash2 />
-                    </button>
+                    <div style={{display: 'flex', gap: '12px'}}>
+                      <button 
+                        onClick={() => handleEditProduct(product)} 
+                        className="admin-edit-btn"
+                        title="Edit Product"
+                        style={{background: 'none', border: 'none', color: '#1890ff', cursor: 'pointer', fontSize: '20px'}}
+                      >
+                        <FiEdit2 />
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteProduct(product.slug)} 
+                        className="admin-delete-btn"
+                        title="Delete Product"
+                        style={{background: 'none', border: 'none', color: '#ff4d4f', cursor: 'pointer', fontSize: '20px'}}
+                      >
+                        <FiTrash2 />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

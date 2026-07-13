@@ -79,3 +79,30 @@ export async function DELETE(request) {
     return NextResponse.json({ error: 'Failed to delete product' }, { status: 500 });
   }
 }
+
+export async function PUT(request) {
+  try {
+    const updatedProduct = await request.json();
+    
+    if (!updatedProduct.id) {
+      return NextResponse.json({ error: 'Product ID is required for update' }, { status: 400 });
+    }
+
+    let products = readProducts();
+    const index = products.findIndex(p => p.id === updatedProduct.id);
+
+    if (index === -1) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    }
+
+    // Merge old product data with new data (to preserve anything not sent, like image if empty)
+    products[index] = { ...products[index], ...updatedProduct };
+
+    fs.writeFileSync(dataFilePath, JSON.stringify(products, null, 2));
+
+    return NextResponse.json({ message: 'Product updated successfully', product: products[index] }, { status: 200 });
+  } catch (error) {
+    console.error("Failed to update product:", error);
+    return NextResponse.json({ error: 'Failed to update product' }, { status: 500 });
+  }
+}

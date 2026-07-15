@@ -15,7 +15,12 @@ export function CartProvider({ children }) {
     fetch("/api/products")
       .then(res => res.json())
       .then(data => {
-        setProducts(data);
+        if (Array.isArray(data)) {
+          setProducts(data);
+        } else {
+          console.error("Expected array of products, got:", data);
+          setProducts([]);
+        }
         setProductsLoading(false);
       })
       .catch(err => {

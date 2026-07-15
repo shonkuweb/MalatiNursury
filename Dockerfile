@@ -44,6 +44,11 @@ RUN chown nextjs:nodejs .next
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Manually copy Prisma and better-sqlite3 native modules because Next.js standalone often misses them
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/better-sqlite3 ./node_modules/better-sqlite3
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+
 # We need the sqlite database to persist or be copied over
 COPY --from=builder --chown=nextjs:nodejs /app/dev.db ./dev.db
 # (Also copy prisma folder if migrations are needed at runtime)

@@ -1,58 +1,79 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-
-const dataFilePath = path.join(process.cwd(), 'app', 'data', 'products.json');
-
-function readProducts() {
-  try {
-    if (!fs.existsSync(dataFilePath)) return [];
-    const fileData = fs.readFileSync(dataFilePath, 'utf8');
-    return JSON.parse(fileData);
-  } catch (error) {
-    return [];
-  }
-}
+import { prisma } from '../../../lib/prisma';
 
 export async function GET() {
-  let products = readProducts();
-  let changed = false;
-  
-  const slugCounts = {};
-  for (let i = 0; i < products.length; i++) {
-    const slug = products[i].slug;
-    if (!slugCounts[slug]) {
-      slugCounts[slug] = 1;
-    } else {
-      slugCounts[slug]++;
-      // Generate a unique slug for duplicates
-      products[i].slug = `${slug}-${Date.now()}-${slugCounts[slug]}`;
-      changed = true;
-    }
+  try {
+    const products = await prisma.product.findMany();
+    return NextResponse.json(products);
+  } catch (error) {
+    console.error("Failed to fetch products:", error);
+    return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
   }
-
-  if (changed) {
-    fs.writeFileSync(dataFilePath, JSON.stringify(products, null, 2));
-  }
-
-  return NextResponse.json(products);
 }
 
 export async function POST(request) {
   try {
-    const newProduct = await request.json();
-    const products = readProducts();
-
-    newProduct.id = Date.now().toString();
-
-    products.push(newProduct);
-
-    fs.writeFileSync(dataFilePath, JSON.stringify(products, null, 2));
+    const data = await request.json();
+    
+    // Convert adeniumOptions to JSON string if it exists
+    let adeniumOptionsStr = null;
+    if (data.adeniumOptions) {
+      adeniumOptionsStr = JSON.stringify(data.adeniumOptions);
+    }
+    
+    const newProduct = await prisma.product.create({
+      data: {
+        slug: data.slug,
+        title: data.title,
+        price: data.price,
+        description: data.description || null,
+        image: data.image || null,
+        type: data.type || null,
+        rating: data.rating || 5.0,
+        reviews: data.reviews || 120,
+        adeniumOptions: adeniumOptionsStr,
+      }
+    });
 
     return NextResponse.json({ message: 'Product added successfully', product: newProduct }, { status: 201 });
   } catch (error) {
     console.error("Failed to add product:", error);
     return NextResponse.json({ error: 'Failed to add product' }, { status: 500 });
+  }
+}
+
+export async function PUT(request) {
+  try {
+    const data = await request.json();
+    
+    if (!data.id) {
+      return NextResponse.json({ error: 'Product ID is required for update' }, { status: 400 });
+    }
+
+    let adeniumOptionsStr = null;
+    if (data.adeniumOptions) {
+      adeniumOptionsStr = JSON.stringify(data.adeniumOptions);
+    }
+
+    const updatedProduct = await prisma.product.update({
+      where: { id: data.id },
+      data: {
+        slug: data.slug,
+        title: data.title,
+        price: data.price,
+        description: data.description || null,
+        image: data.image || null,
+        type: data.type || null,
+        rating: data.rating || 5.0,
+        reviews: data.reviews || 120,
+        adeniumOptions: adeniumOptionsStr,
+      }
+    });
+
+    return NextResponse.json({ message: 'Product updated successfully', product: updatedProduct }, { status: 200 });
+  } catch (error) {
+    console.error("Failed to update product:", error);
+    return NextResponse.json({ error: 'Failed to update product' }, { status: 500 });
   }
 }
 
@@ -65,44 +86,13 @@ export async function DELETE(request) {
       return NextResponse.json({ error: 'Slug is required' }, { status: 400 });
     }
 
-    let products = readProducts();
-    const initialLength = products.length;
-    products = products.filter(p => p.slug !== slug);
+    await prisma.product.delete({
+      where: { slug }
+    });
 
-    if (products.length === initialLength) {
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
-    }
-
-    fs.writeFileSync(dataFilePath, JSON.stringify(products, null, 2));
     return NextResponse.json({ message: 'Product deleted successfully' }, { status: 200 });
   } catch (error) {
+    console.error("Failed to delete product:", error);
     return NextResponse.json({ error: 'Failed to delete product' }, { status: 500 });
-  }
-}
-
-export async function PUT(request) {
-  try {
-    const updatedProduct = await request.json();
-    
-    if (!updatedProduct.id) {
-      return NextResponse.json({ error: 'Product ID is required for update' }, { status: 400 });
-    }
-
-    let products = readProducts();
-    const index = products.findIndex(p => p.id === updatedProduct.id);
-
-    if (index === -1) {
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
-    }
-
-    // Merge old product data with new data (to preserve anything not sent, like image if empty)
-    products[index] = { ...products[index], ...updatedProduct };
-
-    fs.writeFileSync(dataFilePath, JSON.stringify(products, null, 2));
-
-    return NextResponse.json({ message: 'Product updated successfully', product: products[index] }, { status: 200 });
-  } catch (error) {
-    console.error("Failed to update product:", error);
-    return NextResponse.json({ error: 'Failed to update product' }, { status: 500 });
   }
 }

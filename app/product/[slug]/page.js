@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   FiChevronRight,
@@ -11,6 +11,7 @@ import {
   FiMenu,
   FiMinus,
   FiPackage,
+  FiPhone,
   FiPlus,
   FiSearch,
   FiShield,
@@ -26,12 +27,7 @@ import { useCart } from "../../context/CartContext";
 
 
 
-const highlights = [
-  "Healthy, well-rooted live plant",
-  "Air-purifying & easy to maintain",
-  "Ships in protective eco packaging",
-  "14-day replacement guarantee"
-];
+
 
 export default function ProductPage() {
   const params = useParams();
@@ -40,20 +36,12 @@ export default function ProductPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [qty, setQty] = useState(1);
   const [variantQtys, setVariantQtys] = useState({});
-  const [openAccordion, setOpenAccordion] = useState(0);
+  const searchParams = useSearchParams();
+  const mode = searchParams?.get('mode');
+  const isWholesale = mode === 'wholesale';
+
   const { addItem, products, productsLoading, setIsSidebarOpen } = useCart();
   const product = products.find((item) => item.slug === slug);
-
-  const accordionData = [
-    {
-      title: "Product Description",
-      body: product?.description || "A lush, hand-picked plant nurtured in our Kolkata nursery. Each plant is healthy, well-rooted and ready to thrive in your home or balcony garden with minimal care."
-    },
-    {
-      title: "Delivery & Returns",
-      body: "Dispatched within 24 hours with safe, breathable packaging. One-day delivery across Kolkata and a 14-day replacement guarantee on every order."
-    }
-  ];
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
@@ -119,10 +107,13 @@ export default function ProductPage() {
         <button className="icon-btn" aria-label="Open menu" onClick={() => setMenuOpen(true)}>
           <FiMenu />
         </button>
-        <Link href="/" className="header-center" aria-label="Blooming Partners Nursery home" style={{ textDecoration: 'none', color: '#1f6b2c', fontSize: '20px', fontWeight: 'bold', textAlign: 'center', lineHeight: '1.2' }}>
-          Blooming Partners Nursery
+        <Link href="/" className="header-center" aria-label="Malati Nursury home" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <img src="https://pub-ce8688bc6c654bcfb99716f7c9373bcd.r2.dev/Malatinursury/MalatiNurseryLogo.png" alt="Malati Nursury Logo" style={{ height: '40px', width: 'auto', objectFit: 'contain', mixBlendMode: 'multiply' }} />
         </Link>
         <div className="header-actions">
+          <Link href="/admin" className="icon-btn" aria-label="Admin Panel">
+            <FiUser />
+          </Link>
           <button className="icon-btn" aria-label="Shopping bag" onClick={() => setIsSidebarOpen(true)}>
             <FiShoppingBag />
           </button>
@@ -153,113 +144,114 @@ export default function ProductPage() {
       </section>
 
       <section className="product-detail-body">
-        <p className="brand-eyebrow">Blooming Partners Nursery · Best Seller</p>
+        <p className="brand-eyebrow">Malati Nursury · Best Seller</p>
         <h1>{product.title}</h1>
 
-        <div className="rating-line">
-          <span className="stars" aria-hidden="true">
-            {[1, 2, 3, 4, 5].map((n) => (
-              <FiStar key={n} className={n <= ratingValue ? "star filled" : "star"} />
-            ))}
-          </span>
-          <strong>{product.rating}</strong>
-          <span className="rating-count">({product.reviews} reviews)</span>
-        </div>
+        {!isWholesale && (
+          <>
+            <div className="rating-line">
+              <span className="stars" aria-hidden="true">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <FiStar key={n} className={n <= ratingValue ? "star filled" : "star"} />
+                ))}
+              </span>
+              <strong>{product.rating}</strong>
+              <span className="rating-count">({product.reviews} reviews)</span>
+            </div>
 
-        <p className="urgent-pill">🔥 36 sold in the last 24 hours</p>
+            <p className="urgent-pill">🔥 36 sold in the last 24 hours</p>
+          </>
+        )}
 
-        <div className="price-row">
-          {!availableVariants.length && (
-            <>
-              <strong>₹{product.price}</strong>
-              {product.oldPrice && <span>₹{product.oldPrice}</span>}
-              <em className="offer-pill inline">{product.offer}</em>
-            </>
-          )}
-          {availableVariants.length > 0 && (
-            <em className="offer-pill inline">{product.offer}</em>
-          )}
-        </div>
-        <p className="tax-note">Inclusive of all taxes</p>
+        {!isWholesale && (
+          <>
+            <div className="price-row">
+              {!availableVariants.length && (
+                <>
+                  <strong>₹{product.price}</strong>
+                  {product.oldPrice && <span>₹{product.oldPrice}</span>}
+                  <em className="offer-pill inline">{product.offer}</em>
+                </>
+              )}
+              {availableVariants.length > 0 && (
+                <em className="offer-pill inline">{product.offer}</em>
+              )}
+            </div>
+            <p className="tax-note">Inclusive of all taxes</p>
+          </>
+        )}
         <p className="viewing-now">👀 12 people are viewing this right now</p>
 
-        <ul className="highlight-list">
-          {highlights.map((point) => (
-            <li key={point}>{point}</li>
-          ))}
-        </ul>
-
-        <div className="delivery-box">
-          <p>Check delivery & availability</p>
-          <div className="pin-row">
-            <input placeholder="Enter Pincode" aria-label="Enter pincode" />
-            <button type="button">Check</button>
+        {product?.description && (
+          <div className="product-description-inline" style={{ margin: '16px 0', lineHeight: '1.6', color: '#444', whiteSpace: 'pre-wrap' }}>
+            {product.description}
           </div>
-        </div>
+        )}
 
-        {availableVariants.length > 0 ? (
-          <div className="variants-section" style={{marginBottom: '20px', padding: '16px', background: '#f5f8f6', borderRadius: '8px'}}>
-            <h3 style={{marginBottom: '12px', fontSize: '16px'}}>Select Options:</h3>
-            {availableVariants.map(variant => {
-              const vQty = variantQtys[variant] || 0;
-              return (
-                <div key={variant} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px'}}>
-                  <div>
-                    <strong>{variant}</strong>
-                    <div style={{fontSize: '14px', color: '#1f6b2c'}}>₹{product.adeniumOptions[variant]}</div>
-                  </div>
-                  <div className="qty-box" style={{margin: 0}}>
-                    <button type="button" aria-label="Decrease quantity" onClick={() => setVariantQtys(prev => ({...prev, [variant]: Math.max(0, (prev[variant] || 0) - 1)}))}>
-                      <FiMinus />
-                    </button>
-                    <strong>{vQty}</strong>
-                    <button type="button" aria-label="Increase quantity" onClick={() => setVariantQtys(prev => ({...prev, [variant]: (prev[variant] || 0) + 1}))}>
-                      <FiPlus />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="qty-row">
-            <span>Qty:</span>
-            <div className="qty-box">
-              <button type="button" aria-label="Decrease quantity" onClick={() => setQty((q) => Math.max(1, q - 1))}>
-                <FiMinus />
-              </button>
-              <strong>{qty}</strong>
-              <button type="button" aria-label="Increase quantity" onClick={() => setQty((q) => q + 1)}>
-                <FiPlus />
-              </button>
+        {!isWholesale && (
+          <div className="delivery-box">
+            <p>Check delivery & availability</p>
+            <div className="pin-row">
+              <input placeholder="Enter Pincode" aria-label="Enter pincode" />
+              <button type="button">Check</button>
             </div>
           </div>
         )}
 
-        <div className="cta-row">
-          <button onClick={handleAddToCart} className="add-btn ghost">
-            Add to Cart
-          </button>
-          <button onClick={handleBuyNow} className="add-btn">
-            Buy It Now
-          </button>
-        </div>
+        {!isWholesale && (
+          <>
+            {availableVariants.length > 0 ? (
+              <div className="variants-section" style={{marginBottom: '20px', padding: '16px', background: '#f5f8f6', borderRadius: '8px'}}>
+                <h3 style={{marginBottom: '12px', fontSize: '16px'}}>Select Options:</h3>
+                {availableVariants.map(variant => {
+                  const vQty = variantQtys[variant] || 0;
+                  return (
+                    <div key={variant} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px'}}>
+                      <div>
+                        <strong>{variant}</strong>
+                        <div style={{fontSize: '14px', color: '#1f6b2c'}}>₹{product.adeniumOptions[variant]}</div>
+                      </div>
+                      <div className="qty-box" style={{margin: 0}}>
+                        <button type="button" aria-label="Decrease quantity" onClick={() => setVariantQtys(prev => ({...prev, [variant]: Math.max(0, (prev[variant] || 0) - 1)}))}>
+                          <FiMinus />
+                        </button>
+                        <strong>{vQty}</strong>
+                        <button type="button" aria-label="Increase quantity" onClick={() => setVariantQtys(prev => ({...prev, [variant]: (prev[variant] || 0) + 1}))}>
+                          <FiPlus />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="qty-row">
+                <span>Qty:</span>
+                <div className="qty-box">
+                  <button type="button" aria-label="Decrease quantity" onClick={() => setQty((q) => Math.max(1, q - 1))}>
+                    <FiMinus />
+                  </button>
+                  <strong>{qty}</strong>
+                  <button type="button" aria-label="Increase quantity" onClick={() => setQty((q) => q + 1)}>
+                    <FiPlus />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="cta-row">
+              <button onClick={handleAddToCart} className="add-btn ghost">
+                Add to Cart
+              </button>
+              <button onClick={handleBuyNow} className="add-btn">
+                Buy It Now
+              </button>
+            </div>
+          </>
+        )}
       </section>
 
-      <section className="accordion-block">
-        {accordionData.map((item, index) => {
-          const isOpen = openAccordion === index;
-          return (
-            <div key={item.title} className={`accordion-item ${isOpen ? "open" : ""}`}>
-              <button type="button" onClick={() => setOpenAccordion(isOpen ? -1 : index)}>
-                {item.title}
-                <FiChevronDown className="accordion-caret" />
-              </button>
-              {isOpen && <p className="accordion-body">{item.body}</p>}
-            </div>
-          );
-        })}
-      </section>
+
 
       <section className="recommend-wrap">
         <h3>You May Also Like</h3>
@@ -267,14 +259,16 @@ export default function ProductPage() {
           {related.map((item) => (
             <article key={item.slug} className="recommend-card">
               <span className="offer-pill">{item.offer}</span>
-              <Link href={`/product/${item.slug}`} className={`product-image ${item.imageClass}`} />
+              <Link href={`/product/${item.slug}${mode ? `?mode=${mode}` : ''}`} className={`product-image ${item.imageClass}`} />
               <div className="product-info">
                 <p className="product-title">{item.title}</p>
-                <div className="price-row">
-                  <strong>{item.price}</strong>
-                  <span>{item.oldPrice}</span>
-                </div>
-                <Link href={`/product/${item.slug}`} className="add-btn">View</Link>
+                {!isWholesale && (
+                  <div className="price-row">
+                    <strong>{item.price}</strong>
+                    <span>{item.oldPrice}</span>
+                  </div>
+                )}
+                <Link href={`/product/${item.slug}${mode ? `?mode=${mode}` : ''}`} className="add-btn">View</Link>
               </div>
             </article>
           ))}
@@ -317,31 +311,52 @@ export default function ProductPage() {
       </aside>
 
       <nav className="bottom-nav visible" aria-label="Primary navigation">
-        <Link href="/" className="bottom-item" aria-label="Home">
-          <span className="bottom-icon">
-            <FiHome />
-          </span>
-          <span>Home</span>
-        </Link>
-        <button className="bottom-item" type="button" aria-label="Menu" onClick={() => setMenuOpen(true)}>
-          <span className="bottom-icon">
-            <FiGrid />
-          </span>
-          <span>Menu</span>
-        </button>
-        <button className="bottom-item" type="button" aria-label="Cart" onClick={() => setIsSidebarOpen(true)}>
-          <span className="bottom-icon">
-            <FiPackage />
-          </span>
-          <span>Cart</span>
-        </button>
-        <a href="https://wa.me/919836820811" className="bottom-item" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
-          <span className="bottom-icon" style={{ color: '#25D366' }}>
-            <FaWhatsapp />
-          </span>
-          <span>WhatsApp</span>
-        </a>
-        
+        {isWholesale ? (
+          <div style={{ padding: '4px', width: '100%', gridColumn: '1 / -1' }}>
+            <a href="tel:+917427941760" className="add-btn" style={{ 
+                width: '100%', 
+                margin: 0, 
+                padding: '14px', 
+                fontSize: '18px', 
+                display: 'flex', 
+                gap: '12px',
+                justifyContent: 'center', 
+                alignItems: 'center', 
+                borderRadius: '12px',
+                boxShadow: '0 4px 12px rgba(24, 122, 50, 0.3)'
+              }}>
+              <FiPhone style={{ fontSize: '22px' }} />
+              Call now for enquiry
+            </a>
+          </div>
+        ) : (
+          <>
+            <Link href="/" className="bottom-item" aria-label="Home">
+              <span className="bottom-icon">
+                <FiHome />
+              </span>
+              <span>Home</span>
+            </Link>
+            <button className="bottom-item" type="button" aria-label="Menu" onClick={() => setMenuOpen(true)}>
+              <span className="bottom-icon">
+                <FiGrid />
+              </span>
+              <span>Menu</span>
+            </button>
+            <button className="bottom-item" type="button" aria-label="Cart" onClick={() => setIsSidebarOpen(true)}>
+              <span className="bottom-icon">
+                <FiPackage />
+              </span>
+              <span>Cart</span>
+            </button>
+            <a href="https://wa.me/917427941760" className="bottom-item" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+              <span className="bottom-icon" style={{ color: '#25D366' }}>
+                <FaWhatsapp />
+              </span>
+              <span>WhatsApp</span>
+            </a>
+          </>
+        )}
       </nav>
     </main>
   );

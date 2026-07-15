@@ -107,7 +107,7 @@ export default function CheckoutPage() {
     }
 
     const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/919836820811?text=${encodedMessage}`;
+    const whatsappUrl = `https://wa.me/917427941760?text=${encodedMessage}`;
     
     // Open WhatsApp in new window
     window.open(whatsappUrl, '_blank');
@@ -119,13 +119,15 @@ export default function CheckoutPage() {
   return (
     <main className="mobile-page">
       <section className="checkout-shell-modern">
-        <div className="secure-pill-modern">
-          <FiLock /> Secure Checkout
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <div className="secure-pill-modern" style={{ marginBottom: '16px' }}>
+            <FiLock /> Secure Checkout
+          </div>
+          
+          <h1 style={{ marginBottom: '8px' }}>Complete Your Order</h1>
+          
+          {cartItems.length === 0 && <p className="empty-small" style={{ marginBottom: '0' }}>Your cart is empty.</p>}
         </div>
-        
-        <h1>Complete Your Order</h1>
-        
-        {cartItems.length === 0 && <p className="empty-small">Your cart is empty.</p>}
         
         <div className="checkout-card-modern">
           <div className="card-head">
@@ -288,7 +290,7 @@ export default function CheckoutPage() {
           </span>
           <span>Cart</span>
         </button>
-        <a href="https://wa.me/919836820811" className="bottom-item" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+        <a href="https://wa.me/917427941760" className="bottom-item" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
           <span className="bottom-icon" style={{ color: '#25D366' }}>
             <FaWhatsapp />
           </span>

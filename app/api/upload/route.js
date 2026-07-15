@@ -22,8 +22,16 @@ export async function POST(request) {
     const buffer = Buffer.from(await file.arrayBuffer());
     const filename = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
     
-    // As requested: the folder is named "bpn"
-    const objectKey = `bpn/${Date.now()}_${filename}`;
+    const type = formData.get('type') || '';
+    
+    let folderName = 'Malatinursury/Both'; // default
+    if (type === 'Wholesale only') {
+      folderName = 'Malatinursury/WholeSale';
+    } else if (type === 'Retail only') {
+      folderName = 'Malatinursury/Retail';
+    }
+
+    const objectKey = `${folderName}/${Date.now()}_${filename}`;
 
     const command = new PutObjectCommand({
       Bucket: process.env.R2_BUCKET_NAME || 'bpn',

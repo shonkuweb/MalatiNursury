@@ -1,15 +1,20 @@
+import AdminHeader from './components/AdminHeader';
+
 export const metadata = {
-  title: 'Admin Panel - Blooming Partners Nursery',
+  title: 'Malati Nursery Admin',
 };
 
 export default function AdminLayout({ children }) {
   return (
-    <div style={{ padding: '20px', fontFamily: 'system-ui, sans-serif', maxWidth: '1200px', margin: '0 auto' }}>
-      <header style={{ borderBottom: '1px solid #ccc', paddingBottom: '10px', marginBottom: '20px' }}>
-        <h1 style={{ margin: 0, color: '#1f6b2c' }}>Admin Panel</h1>
-        <p style={{ margin: 0, color: '#666' }}>Manage your products here.</p>
-      </header>
-      {children}
+    <div style={{ 
+      minHeight: '100vh',
+      fontFamily: '"Inter", system-ui, sans-serif',
+      backgroundColor: '#f8faf9' 
+    }}>
+      <div style={{ padding: '40px 20px', maxWidth: '1200px', margin: '0 auto', position: 'relative' }}>
+        <AdminHeader />
+        {children}
+      </div>
     </div>
   );
 }

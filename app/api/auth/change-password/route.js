@@ -1,0 +1,53 @@
+import { NextResponse } from 'next/server';
+import { prisma } from '../../../../lib/prisma';
+import crypto from 'crypto';
+
+function hashPassword(password) {
+  return crypto.createHash('sha256').update(password).digest('hex');
+}
+
+export async function POST(request) {
+  try {
+    // Check if the user is authenticated
+    const token = request.cookies.get('admin_token');
+    if (!token) {
+      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { currentPassword, newPassword } = await request.json();
+
+    const passwordSetting = await prisma.settings.findUnique({
+      where: { key: 'admin_password' }
+    });
+
+    let isCurrentValid = false;
+    
+    if (passwordSetting) {
+      if (hashPassword(currentPassword) === passwordSetting.value) {
+        isCurrentValid = true;
+      }
+    } else {
+      if (currentPassword === process.env.ADMIN_PASSWORD) {
+        isCurrentValid = true;
+      }
+    }
+
+    if (!isCurrentValid) {
+      return NextResponse.json({ success: false, message: 'Current password is incorrect' }, { status: 400 });
+    }
+
+    // Update password
+    const hashedNewPassword = hashPassword(newPassword);
+
+    await prisma.settings.upsert({
+      where: { key: 'admin_password' },
+      update: { value: hashedNewPassword },
+      create: { key: 'admin_password', value: hashedNewPassword }
+    });
+
+    return NextResponse.json({ success: true, message: 'Password updated successfully' });
+  } catch (error) {
+    console.error("Change password error:", error);
+    return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 });
+  }
+}

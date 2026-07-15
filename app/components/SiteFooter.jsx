@@ -8,7 +8,7 @@ export default function SiteFooter() {
         <Link href="/track-order" className="footer-link">Track Your Order</Link>
       </div>
 
-      <p className="footer-note">Blooming Partners Nursery © {new Date().getFullYear()}</p>
+      <p className="footer-note">Malati Nursury © {new Date().getFullYear()}</p>
     </footer>
   );
 }

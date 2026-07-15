@@ -1,0 +1,31 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  engineType = "binary"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Settings {
+  key   String @id
+  value String
+}
+
+model Product {
+  id             String  @id @default(uuid())
+  slug           String  @unique
+  title          String
+  price          String
+  description    String?
+  image          String?
+  type           String?
+  rating         Float   @default(5.0)
+  reviews        Int     @default(120)
+  adeniumOptions String? // Stored as JSON string
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}

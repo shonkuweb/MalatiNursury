@@ -9,7 +9,6 @@ export default function AdminPage() {
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
-  const [isAddingCategory, setIsAddingCategory] = useState(false);
   
   // Edit mode state
   const [editingProductId, setEditingProductId] = useState(null);
@@ -19,38 +18,18 @@ export default function AdminPage() {
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [price, setPrice] = useState("");
-  const [oldPrice, setOldPrice] = useState("");
-  const [offer, setOffer] = useState("");
+  const [description, setDescription] = useState("");
   const [file, setFile] = useState(null);
-  const [categoryId, setCategoryId] = useState("");
+  const [type, setType] = useState("");
   
   // Adenium options state
   const [adeniumPrice8, setAdeniumPrice8] = useState("");
   const [adeniumPrice10, setAdeniumPrice10] = useState("");
   const [adeniumPriceSingle, setAdeniumPriceSingle] = useState("");
 
-  // New category form state
-  const [categoryName, setCategoryName] = useState("");
-  const [categorySlug, setCategorySlug] = useState("");
-
   useEffect(() => {
     fetchData();
   }, []);
-
-  // Temporary feature: auto-select Hoya category on load
-  useEffect(() => {
-    if (categories.length > 0 && !categoryId) {
-      const hoyaCat = categories.find(c => c.name.toLowerCase() === 'hoya');
-      if (hoyaCat) {
-        setCategoryId(hoyaCat.id.toString());
-        setTitle('Hoya');
-        setSlug(`hoya-${Date.now()}`);
-        setPrice('450');
-        setOldPrice('650');
-        setOffer('20% OFF');
-      }
-    }
-  }, [categories, categoryId]);
 
   const fetchData = async () => {
     try {
@@ -79,47 +58,14 @@ export default function AdminPage() {
     }
   };
 
-  const handleDeleteCategory = async (slug) => {
-    if (!confirm("Are you sure you want to delete this category? Products in this category will lose their category association.")) return;
-    try {
-      await fetch(`/api/categories?slug=${slug}`, { method: "DELETE" });
-      fetchData();
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleAddCategory = async (e) => {
-    e.preventDefault();
-    if (!categoryName || !categorySlug) return;
-    setIsAddingCategory(true);
-    try {
-      const res = await fetch("/api/categories", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: categoryName, slug: categorySlug }),
-      });
-      if (!res.ok) throw new Error("Failed to add category");
-      setCategoryName("");
-      setCategorySlug("");
-      fetchData();
-    } catch (err) {
-      console.error(err);
-      alert("Error: " + err.message);
-    } finally {
-      setIsAddingCategory(false);
-    }
-  };
-
   const handleEditProduct = (product) => {
     setEditingProductId(product.id);
     setTitle(product.title);
     setSlug(product.slug);
     setPrice(product.price);
-    setOldPrice(product.oldPrice || "");
-    setOffer(product.offer || "");
+    setDescription(product.description || "");
     setExistingImage(product.image);
-    setCategoryId(product.categoryId ? product.categoryId.toString() : "");
+    setType(product.type || "");
     setFile(null);
 
     if (product.adeniumOptions) {
@@ -140,11 +86,10 @@ export default function AdminPage() {
     setTitle("");
     setSlug("");
     setPrice("");
-    setOldPrice("");
-    setOffer("");
+    setDescription("");
     setExistingImage("");
     setFile(null);
-    setCategoryId("");
+    setType("");
     setAdeniumPrice8("");
     setAdeniumPrice10("");
     setAdeniumPriceSingle("");
@@ -177,6 +122,7 @@ export default function AdminPage() {
         
         const formData = new FormData();
         formData.append("file", new File([compressedFile], file.name, { type: compressedFile.type }));
+        formData.append("type", type);
 
         const uploadRes = await fetch("/api/upload", {
           method: "POST",
@@ -192,7 +138,7 @@ export default function AdminPage() {
       }
 
       // 2. Save the product
-      const isAdenium = categories.find(c => c.id == categoryId)?.name === "Adenium";
+      const isAdenium = title.toLowerCase().includes('adenium');
       const adeniumOptions = isAdenium ? {
         "Multigrafted 8\" Pot": adeniumPrice8 || null,
         "Multigrafted 10\" Pot": adeniumPrice10 || null,
@@ -203,10 +149,9 @@ export default function AdminPage() {
         slug,
         title,
         price,
-        oldPrice: oldPrice || undefined,
-        offer: offer || undefined,
+        description,
         image: imageUrl,
-        categoryId: categoryId ? parseInt(categoryId) : null,
+        type,
         rating: 5.0,
         reviews: 120,
         adeniumOptions
@@ -253,51 +198,12 @@ export default function AdminPage() {
     setSlug(newTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''));
   };
 
-  const handleCategoryNameChange = (e) => {
-    const newName = e.target.value;
-    setCategoryName(newName);
-    setCategorySlug(newName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''));
-  };
-
   return (
-    <div className="admin-container">
-      <header className="admin-header">
-        <div className="admin-header-content">
-          <h1>Admin Dashboard</h1>
-          <Link href="/" className="admin-back-btn">View Store</Link>
-        </div>
-      </header>
-
-      <main className="admin-main">
+    <div className="admin-container" style={{ padding: 0 }}>
+      <main className="admin-main" style={{ margin: 0 }}>
         <div className="admin-content-grid">
           
           <div className="admin-left-col">
-            <section className="admin-card add-product-section" style={{marginBottom: '24px'}}>
-              <h2><FiTag /> Manage Categories</h2>
-              <form onSubmit={handleAddCategory} className="admin-form" style={{display: 'flex', gap: '8px', marginBottom: '16px'}}>
-                <input 
-                  type="text" 
-                  value={categoryName} 
-                  onChange={handleCategoryNameChange} 
-                  placeholder="New Category Name" 
-                  required 
-                  style={{flex: 1, padding: '8px', border: '1px solid #ddd', borderRadius: '4px'}}
-                />
-                <button type="submit" disabled={isAddingCategory} style={{background: '#187a32', color: 'white', padding: '8px 16px', border: 'none', borderRadius: '4px', cursor: 'pointer'}}>
-                  {isAddingCategory ? "Adding..." : "Add"}
-                </button>
-              </form>
-              <div className="admin-category-list">
-                {categories.map(cat => (
-                  <div key={cat.id} style={{display: 'flex', justifyContent: 'space-between', padding: '8px', borderBottom: '1px solid #eee', alignItems: 'center'}}>
-                    <span>{cat.name}</span>
-                    <button onClick={() => handleDeleteCategory(cat.slug)} style={{background: 'none', border: 'none', color: '#ff4d4f', cursor: 'pointer'}}><FiTrash2 /></button>
-                  </div>
-                ))}
-                {categories.length === 0 && <p style={{color: '#666', fontSize: '14px'}}>No categories yet.</p>}
-              </div>
-            </section>
-
             <section className="admin-card add-product-section">
               <h2><FiPlus /> {editingProductId ? "Edit Product" : "Add New Product"}</h2>
               <form onSubmit={handleSubmitProduct} className="admin-form">
@@ -313,44 +219,20 @@ export default function AdminPage() {
                 </div>
 
                 <div className="form-group">
-                  <label>URL Slug</label>
-                  <input 
-                    type="text" 
-                    value={slug} 
-                    onChange={(e) => setSlug(e.target.value)} 
-                    placeholder="e.g. rare-hoya-compacta" 
-                    required 
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Category</label>
+                  <label>Type</label>
                   <select 
-                    value={categoryId} 
-                    onChange={(e) => {
-                      const newCatId = e.target.value;
-                      setCategoryId(newCatId);
-                      
-                      // Temporary feature for Hoya category
-                      const selectedCat = categories.find(c => c.id == newCatId);
-                      if (selectedCat && selectedCat.name.toLowerCase() === 'hoya') {
-                        setTitle('Hoya');
-                        setSlug(`hoya-${Date.now()}`);
-                        setPrice('450');
-                        setOldPrice('650');
-                        setOffer('20% OFF');
-                      }
-                    }}
-                    style={{width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #cde2d3'}}
+                    value={type} 
+                    onChange={(e) => setType(e.target.value)}
+                    required
                   >
-                    <option value="">Select a Category (Optional)</option>
-                    {categories.map(cat => (
-                      <option key={cat.id} value={cat.id}>{cat.name}</option>
-                    ))}
+                    <option value="">Select a Type</option>
+                    <option value="Both Wholesale and retail">Both Wholesale and retail</option>
+                    <option value="Wholesale only">Wholesale only</option>
+                    <option value="Retail only">Retail only</option>
                   </select>
                 </div>
 
-                {categories.find(c => c.id == categoryId)?.name === "Adenium" && (
+                {title.toLowerCase().includes('adenium') && (
                   <div className="form-group" style={{background: '#f9f9f9', padding: '16px', borderRadius: '8px', marginBottom: '16px'}}>
                     <h3 style={{marginBottom: '12px', fontSize: '16px', color: '#187a32'}}>Adenium Prices (Leave empty if not applicable)</h3>
                     <div style={{display: 'flex', gap: '12px', flexDirection: 'column'}}>
@@ -370,35 +252,24 @@ export default function AdminPage() {
                   </div>
                 )}
 
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Price (₹)</label>
-                    <input 
-                      type="number" 
-                      value={price} 
-                      onChange={(e) => setPrice(e.target.value)} 
-                      placeholder="299" 
-                      required 
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Old Price (₹) (Optional)</label>
-                    <input 
-                      type="number" 
-                      value={oldPrice} 
-                      onChange={(e) => setOldPrice(e.target.value)} 
-                      placeholder="399" 
-                    />
-                  </div>
+                <div className="form-group">
+                  <label>Price (₹)</label>
+                  <input 
+                    type="number" 
+                    value={price} 
+                    onChange={(e) => setPrice(e.target.value)} 
+                    placeholder="299" 
+                    required 
+                  />
                 </div>
 
                 <div className="form-group">
-                  <label>Offer Badge Text (Optional)</label>
-                  <input 
-                    type="text" 
-                    value={offer} 
-                    onChange={(e) => setOffer(e.target.value)} 
-                    placeholder="e.g. 20% OFF" 
+                  <label>Description</label>
+                  <textarea 
+                    value={description} 
+                    onChange={(e) => setDescription(e.target.value)} 
+                    placeholder="Product description..." 
+                    rows={4}
                   />
                 </div>
 
@@ -423,7 +294,7 @@ export default function AdminPage() {
                     {isUploading ? "Saving..." : (editingProductId ? "Update Product" : "Save Product")}
                   </button>
                   {editingProductId && (
-                    <button type="button" onClick={handleCancelEdit} style={{padding: '12px 24px', background: '#666', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold'}}>
+                    <button type="button" onClick={handleCancelEdit} className="admin-cancel-btn" style={{flex: 1}}>
                       Cancel Edit
                     </button>
                   )}
@@ -447,7 +318,7 @@ export default function AdminPage() {
                     </div>
                     <div className="admin-product-details">
                       <h3>{product.title}</h3>
-                      <p>₹{product.price} {product.oldPrice && <span>(was ₹{product.oldPrice})</span>}</p>
+                      <p>₹{product.price} {product.type && <span>({product.type})</span>}</p>
                       {product.category_name && <span style={{fontSize: '12px', background: '#eaf4ee', color: '#187a32', padding: '2px 8px', borderRadius: '12px', display: 'inline-block', marginTop: '4px'}}>{product.category_name}</span>}
                     </div>
                     <div style={{display: 'flex', gap: '12px'}}>

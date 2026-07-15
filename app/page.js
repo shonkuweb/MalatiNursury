@@ -20,12 +20,13 @@ import { categories as defaultCategories } from "./data/categories";
 import { useCart } from "./context/CartContext";
 
 export default function Home() {
-  const heroEndRef = useRef(null);
+
   const [showBottomNav, setShowBottomNav] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategoryId, setActiveCategoryId] = useState(null);
   const [dbCategories, setDbCategories] = useState([]);
+  const [priceMode, setPriceMode] = useState("wholesale");
   
   const { addItem, products, productsLoading, setIsSidebarOpen } = useCart();
 
@@ -41,31 +42,31 @@ export default function Home() {
   const filteredProducts = (products || []).filter(p => {
     const matchesSearch = p.title?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = activeCategoryId ? p.categoryId === parseInt(activeCategoryId) || p.categoryId === activeCategoryId : true;
-    return matchesSearch && matchesCategory;
+    
+    // Filter by priceMode
+    let matchesMode = true;
+    if (priceMode === "wholesale") {
+      matchesMode = p.type !== "Retail only"; // include "Wholesale only" and "Both Wholesale and retail"
+    } else if (priceMode === "retail") {
+      matchesMode = p.type !== "Wholesale only"; // include "Retail only" and "Both Wholesale and retail"
+    }
+    
+    return matchesSearch && matchesCategory && matchesMode;
   });
 
   useEffect(() => {
-    const checkHero = () => {
-      if (!heroEndRef.current) return;
-      const heroEndTop = heroEndRef.current.getBoundingClientRect().top;
+    const checkScroll = () => {
       const atTop = window.scrollY <= 4;
-
-      // Show nav right after the hero block ends. Keep it visible while
-      // scrolling upward, and hide only when the website top is visible.
-      setShowBottomNav((prev) => {
-        if (atTop) return false;
-        if (heroEndTop <= 0) return true;
-        return prev;
-      });
+      setShowBottomNav(!atTop);
     };
 
-    checkHero();
-    window.addEventListener("scroll", checkHero, { passive: true });
-    window.addEventListener("resize", checkHero);
+    checkScroll();
+    window.addEventListener("scroll", checkScroll, { passive: true });
+    window.addEventListener("resize", checkScroll);
 
     return () => {
-      window.removeEventListener("scroll", checkHero);
-      window.removeEventListener("resize", checkHero);
+      window.removeEventListener("scroll", checkScroll);
+      window.removeEventListener("resize", checkScroll);
     };
   }, []);
 
@@ -80,7 +81,7 @@ export default function Home() {
   const isAdenium = activeCategory?.slug?.toLowerCase() === 'adenium' || activeCategory?.name?.toLowerCase() === 'adenium';
   const heroStyle = isAdenium
     ? { background: 'url("https://pub-ce8688bc6c654bcfb99716f7c9373bcd.r2.dev/bpn/1782732499136_c85775c1-ac41-427e-85ce-6bb60f9a3a40__1_.png") center/cover no-repeat' }
-    : {};
+    : { background: 'url("https://pub-ce8688bc6c654bcfb99716f7c9373bcd.r2.dev/Malatinursury/4c4556bc-0920-4575-97e6-94ba6de15e6f.png") center/cover no-repeat' };
 
   return (
     <main className="mobile-page">
@@ -90,10 +91,13 @@ export default function Home() {
         <button className="icon-btn" aria-label="Open menu" onClick={() => setMenuOpen(true)}>
           <FiMenu />
         </button>
-        <Link href="/" className="header-center" aria-label="Blooming Partners Nursery home" style={{ textDecoration: 'none', color: '#1f6b2c', fontSize: '20px', fontWeight: 'bold', textAlign: 'center', lineHeight: '1.2' }}>
-          Blooming Partners Nursery
+        <Link href="/" className="header-center" aria-label="Malati Nursury home" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <img src="https://pub-ce8688bc6c654bcfb99716f7c9373bcd.r2.dev/Malatinursury/MalatiNurseryLogo.png" alt="Malati Nursury Logo" style={{ height: '40px', width: 'auto', objectFit: 'contain', mixBlendMode: 'multiply' }} />
         </Link>
         <div className="header-actions">
+          <Link href="/admin" className="icon-btn" aria-label="Admin Panel">
+            <FiUser />
+          </Link>
           <button className="icon-btn" aria-label="Shopping bag" onClick={() => setIsSidebarOpen(true)}>
             <FiShoppingBag />
           </button>
@@ -115,7 +119,7 @@ export default function Home() {
 
       {!searchQuery && (
         <>
-          <section className="hero" style={heroStyle}>
+          <section className="hero" style={{ ...heroStyle }}>
             <div className="hero-overlay">
               <span className="badge">NEW ARRIVALS</span>
               <h2>Bring Life to Your Home</h2>
@@ -123,12 +127,26 @@ export default function Home() {
               <button className="cta-btn">Shop Now</button>
             </div>
           </section>
-          <div ref={heroEndRef} aria-hidden="true" />
 
           <div className="notice">
             <p className="notice-track">
               For product replacement, please record a continuous, single-shot video while opening the package.
             </p>
+          </div>
+
+          <div className="price-btn-container">
+            <button 
+              className={priceMode === "wholesale" ? "price-btn-active" : "price-btn-inactive"}
+              onClick={() => setPriceMode("wholesale")}
+            >
+              Wholesale Price
+            </button>
+            <button 
+              className={priceMode === "retail" ? "price-btn-active" : "price-btn-inactive"}
+              onClick={() => setPriceMode("retail")}
+            >
+              Retail Price
+            </button>
           </div>
         </>
       )}
@@ -150,7 +168,7 @@ export default function Home() {
 
       <section className="best-sellers">
         <div className="section-title">
-          <h2>Trending Plants</h2>
+
 
         </div>
 
@@ -170,19 +188,27 @@ export default function Home() {
             filteredProducts.map((product) => (
               <article key={product.id || product.slug} className="product-card">
                 <span className="offer-pill">{product.offer}</span>
-                <Link href={`/product/${product.slug}`} className="product-image-link" style={{ display: 'block', overflow: 'hidden' }}>
+                <Link href={`/product/${product.slug}?mode=${priceMode}`} className="product-image-link" style={{ display: 'block', overflow: 'hidden' }}>
                   <img src={product.image} alt={product.title} style={{ width: '100%', height: '200px', objectFit: 'cover' }} />
                 </Link>
                 <div className="product-info">
                   <p className="product-title">{product.title}</p>
                   <p className="product-rating">☆ ☆ ☆ ☆ ☆ 5.0 | 120 Reviews</p>
-                  <div className="price-row">
-                    <strong>₹{product.price}</strong>
-                    {product.oldPrice && <span>₹{product.oldPrice}</span>}
-                  </div>
-                  <button className="add-btn" onClick={() => addItem(product.slug, 1)}>
-                    Add to Cart
-                  </button>
+                  {priceMode !== "wholesale" && (
+                    <div className="price-row">
+                      <strong>₹{product.price}</strong>
+                      {product.oldPrice && <span>₹{product.oldPrice}</span>}
+                    </div>
+                  )}
+                  {priceMode === "wholesale" ? (
+                    <Link href={`/product/${product.slug}?mode=${priceMode}`} className="add-btn ghost" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', textDecoration: 'none' }}>
+                      View Product
+                    </Link>
+                  ) : (
+                    <button className="add-btn" onClick={() => addItem(product.slug, 1)}>
+                      Add to Cart
+                    </button>
+                  )}
                 </div>
               </article>
             ))
@@ -254,7 +280,7 @@ export default function Home() {
           </span>
           <span>Cart</span>
         </button>
-        <a href="https://wa.me/919836820811" className="bottom-item" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+        <a href="https://wa.me/917427941760" className="bottom-item" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
           <span className="bottom-icon" style={{ color: '#25D366' }}>
             <FaWhatsapp />
           </span>

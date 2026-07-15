@@ -1,10 +1,12 @@
-FROM node:18-alpine AS base
+FROM node:20-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
-RUN apk add --no-cache libc6-compat
+# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
+RUN apk add --no-cache libc6-compat python3 make g++ 
 WORKDIR /app
 
+# Install dependencies
 COPY package.json package-lock.json* ./
 RUN npm ci
 
@@ -15,7 +17,10 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Next.js telemetry is disabled
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Generate Prisma Client
+RUN npx prisma generate
 
 RUN npm run build
 
@@ -23,8 +28,8 @@ RUN npm run build
 FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -39,12 +44,16 @@ RUN chown nextjs:nodejs .next
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# We need the data directory for the JSON store to persist
-COPY --from=builder /app/app/data ./app/data
+# We need the sqlite database to persist or be copied over
+COPY --from=builder --chown=nextjs:nodejs /app/dev.db ./dev.db
+# (Also copy prisma folder if migrations are needed at runtime)
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+
+USER nextjs
 
 EXPOSE 3000
 
-ENV PORT 3000
-ENV HOSTNAME "0.0.0.0"
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
 CMD ["node", "server.js"]

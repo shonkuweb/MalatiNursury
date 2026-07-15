@@ -5,12 +5,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: bpn-store
+    container_name: malati_app
     restart: always
     ports:
-      - "3000:3000"
+      - "3005:3000"
     volumes:
-      # Mount the data folder so JSON files persist if the container restarts
-      - ./app/data:/app/app/data
+      # Mount the data folder so JSON files and SQLite DB persist if the container restarts
+      - ./data:/data
     env_file:
-      - .env.local
+      - .env

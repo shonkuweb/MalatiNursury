@@ -145,7 +145,7 @@ export default function Home() {
               className={priceMode === "wholesale" ? "price-btn-active" : "price-btn-inactive"}
               onClick={() => setPriceMode("wholesale")}
             >
-              Wholesale Price
+              <span style={{ color: 'red' }}>Wholesale Price</span>
             </button>
           </div>
         </>

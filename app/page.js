@@ -26,7 +26,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategoryId, setActiveCategoryId] = useState(null);
   const [dbCategories, setDbCategories] = useState([]);
-  const [priceMode, setPriceMode] = useState("wholesale");
+  const [priceMode, setPriceMode] = useState("retail");
   
   const { addItem, products, productsLoading, setIsSidebarOpen } = useCart();
 

@@ -260,7 +260,7 @@ export default function ProductPage() {
             <article key={item.slug} className="recommend-card">
               <span className="offer-pill">{item.offer}</span>
               <Link href={`/product/${item.slug}${mode ? `?mode=${mode}` : ''}`} className="product-image-link" style={{ display: 'block', overflow: 'hidden' }}>
-                <img src={item.image} alt={item.title} style={{ width: '100%', height: '180px', objectFit: 'cover' }} />
+                <img src={item.image} alt={item.title} loading="lazy" decoding="async" style={{ width: '100%', height: '180px', objectFit: 'cover' }} />
               </Link>
               <div className="product-info">
                 <p className="product-title">{item.title}</p>

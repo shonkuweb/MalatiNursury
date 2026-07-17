@@ -189,7 +189,7 @@ export default function Home() {
               <article key={product.id || product.slug} className="product-card">
                 <span className="offer-pill">{product.offer}</span>
                 <Link href={`/product/${product.slug}?mode=${priceMode}`} className="product-image-link" style={{ display: 'block', overflow: 'hidden' }}>
-                  <img src={product.image} alt={product.title} style={{ width: '100%', height: '200px', objectFit: 'cover' }} />
+                  <img src={product.image} alt={product.title} loading="lazy" decoding="async" style={{ width: '100%', height: '200px', objectFit: 'cover' }} />
                 </Link>
                 <div className="product-info">
                   <p className="product-title">{product.title}</p>

@@ -174,7 +174,8 @@ export default function AdminPage() {
       }
 
       if (!res.ok) {
-        throw new Error(`Failed to ${editingProductId ? 'update' : 'save'} product`);
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `Failed to ${editingProductId ? 'update' : 'save'} product`);
       }
 
       // 3. Reset form

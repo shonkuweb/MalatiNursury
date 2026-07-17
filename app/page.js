@@ -136,16 +136,16 @@ export default function Home() {
 
           <div className="price-btn-container">
             <button 
-              className={priceMode === "wholesale" ? "price-btn-active" : "price-btn-inactive"}
-              onClick={() => setPriceMode("wholesale")}
-            >
-              Wholesale Price
-            </button>
-            <button 
               className={priceMode === "retail" ? "price-btn-active" : "price-btn-inactive"}
               onClick={() => setPriceMode("retail")}
             >
               Retail Price
+            </button>
+            <button 
+              className={priceMode === "wholesale" ? "price-btn-active" : "price-btn-inactive"}
+              onClick={() => setPriceMode("wholesale")}
+            >
+              Wholesale Price
             </button>
           </div>
         </>

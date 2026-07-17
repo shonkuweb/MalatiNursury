@@ -122,9 +122,9 @@ export default function Home() {
           <section className="hero" style={{ ...heroStyle }}>
             <div className="hero-overlay">
               <span className="badge">NEW ARRIVALS</span>
-              <h2>Over 300 varieties of plants in stock.</h2>
-              <p>20 years experience, Most popular nursery in Panskura</p>
-              <button className="cta-btn">Call Me</button>
+              <h2>Over 300 varities of plants in stock.</h2>
+              <p>20 years experience , Most popular nursury in Panskura</p>
+              <a href="tel:+917427941760" className="cta-btn" style={{ display: 'inline-block', textDecoration: 'none' }}>Call me</a>
             </div>
           </section>
 

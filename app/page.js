@@ -130,10 +130,7 @@ export default function Home() {
 
           <div className="notice">
             <p className="notice-track">
-              For product replacement, please record a continuous, single-shot video while opening the package.
-            </p>
-            <p className="location-text" style={{ textAlign: 'center', marginTop: '5px', fontSize: '14px', color: '#333' }}>
-              location. West Bengal /panskura/721152
+              Location. West Bengal /Panskura/721152 &nbsp;&nbsp;|&nbsp;&nbsp; Mobile: +917427941760
             </p>
           </div>
 

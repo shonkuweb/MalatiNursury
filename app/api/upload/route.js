@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
+const cleanEnv = (val) => (val || '').replace(/^["']|["']$/g, '');
+
 const s3 = new S3Client({
   region: 'auto',
-  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  endpoint: `https://${cleanEnv(process.env.R2_ACCOUNT_ID)}.r2.cloudflarestorage.com`,
   credentials: {
-    accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
+    accessKeyId: cleanEnv(process.env.R2_ACCESS_KEY_ID),
+    secretAccessKey: cleanEnv(process.env.R2_SECRET_ACCESS_KEY),
   },
 });
 
@@ -34,7 +36,7 @@ export async function POST(request) {
     const objectKey = `${folderName}/${Date.now()}_${filename}`;
 
     const command = new PutObjectCommand({
-      Bucket: process.env.R2_BUCKET_NAME || 'bpn',
+      Bucket: cleanEnv(process.env.R2_BUCKET_NAME) || 'bpn',
       Key: objectKey,
       Body: buffer,
       ContentType: file.type,
@@ -42,12 +44,12 @@ export async function POST(request) {
 
     await s3.send(command);
 
-    const publicUrlBase = process.env.R2_PUBLIC_URL || 'https://pub-ce8688bc6c654bcfb99716f7c9373bcd.r2.dev';
+    const publicUrlBase = cleanEnv(process.env.R2_PUBLIC_URL) || 'https://pub-ce8688bc6c654bcfb99716f7c9373bcd.r2.dev';
     const fileUrl = `${publicUrlBase}/${objectKey}`;
     
     return NextResponse.json({ Message: "Success", status: 201, url: fileUrl });
   } catch (error) {
     console.error("Error occurred uploading to R2:", error);
-    return NextResponse.json({ Message: "Failed", status: 500, error: error.message });
+    return NextResponse.json({ Message: "Failed", error: error.message }, { status: 500 });
   }
 }

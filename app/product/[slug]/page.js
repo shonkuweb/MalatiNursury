@@ -66,7 +66,7 @@ export default function ProductPage() {
     );
   }
 
-  const related = products.filter((item) => item.slug !== product.slug).slice(0, 3);
+  const related = products.filter((item) => item.slug !== product.slug);
   const ratingValue = Math.round(parseFloat(product.rating));
   const availableVariants = product?.adeniumOptions ? Object.keys(product.adeniumOptions).filter(k => product.adeniumOptions[k] !== null && product.adeniumOptions[k] !== "") : [];
 

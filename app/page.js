@@ -130,7 +130,7 @@ export default function Home() {
 
           <div className="notice">
             <p className="notice-track">
-              Location. West Bengal /Panskura/721152 &nbsp;&nbsp;|&nbsp;&nbsp; Mobile: +917427941760
+              Location. West Bengal /Panskura/721152 &nbsp;&nbsp;|&nbsp;&nbsp; Mobile: +917427941760 , +917978243235
             </p>
           </div>
 
